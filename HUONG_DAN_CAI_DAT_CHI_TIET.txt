@@ -1,0 +1,74 @@
+================================================================================
+HUONG DAN CAI DAT VA SU DUNG UNG DUNG ECOAI - CO VAN XANH (PHAN MEM THPT)
+Tac gia / Chu nhiem de tai: Thay Ho Sy Long - SDT: 0943278804
+Mo hinh tich hop GDPT 2018: Dia li 10-12, Sinh hoc 12, Hoat dong trai nghiem
+================================================================================
+
+Chao Thay/Co va cac em hoc sinh,
+Day la toan bo ma nguon hoan thien cua ung dung EcoAI da duoc nang cap toan dien:
+- Ban do Viet Nam 3D chuan xac, khang dinh chu quyen Hoang Sa & Truong Sa.
+- May tinh Carbon chuan hoa luoi dien VN 2024 co tinh chia se phong dieu hoa.
+- Phan loai rac Gemini Vision 3+1 nhom (Tich hop nhom Rac nguy hai: Pin, bong den).
+- Phieu hoc tap so & Trac nghiem truoc/sau (Pre/Post-test) phuc vu bao cao SKKN.
+- Bao toan trang thai khi chuyen Tab (State Persistence), khong bi mat du lieu.
+
+--------------------------------------------------------------------------------
+BUOC 1: CAI DAT MOI TRUONG NODE.JS (Chi can lam 1 lan dau tien)
+--------------------------------------------------------------------------------
+1. Neu may tinh chua co Node.js, hay truy cap trang chu:
+   https://nodejs.org/
+2. Tai ban khuyen nghi "LTS" ve may va cai dat (nhan Next -> Next -> Finish).
+3. De kiem tra da cai thanh cong chua, ban mo Command Prompt (cmd) va go:
+   node -v
+   Neu hien ra phien ban (vi du v18.x hoac v20.x, v22.x) la thanh cong!
+
+--------------------------------------------------------------------------------
+BUOC 2: CHAY UNG DUNG (CUC KY DON GIAN)
+--------------------------------------------------------------------------------
+[CACH 1 - NHANH NHAT CHO WINDOWS]:
+- Ban chi can bam dup chuot (double-click) vao file:
+  "chay-ecoai-windows.bat"
+- He thong se tu dong kiem tra, cai dat thu vien va tu dong mo trinh duyet
+  tai dia chi: http://localhost:3000
+
+[CACH 2 - CHAY BANG DONG LENH THU CONG]:
+1. Mo thu muc chua ma nguon EcoAI nay.
+2. Mo Command Prompt hoac PowerShell tai thu muc:
+   (Nhan vao thanh dia chi thu muc trong File Explorer, go "cmd" roi Enter).
+3. Cai dat thu vien:
+   npm install
+4. Khoi dong may chu:
+   npm run dev
+5. Mo trinh duyet web (Chrome, Edge, Coc Coc) va truy cap:
+   http://localhost:3000
+
+--------------------------------------------------------------------------------
+BUOC 3: SU DUNG & KET NOI GOOGLE GEMINI API (Tuy chon)
+--------------------------------------------------------------------------------
+- Ung dung hoat dong day du ca o "Che do Su pham Mo phong Offline" (khong can API key)
+  va "Che do AI Truc tiep" (khi da ket noi Gemini API).
+- Huong dan lay API Key mien phi:
+  1. Vao trang https://aistudio.google.com/app/apikey (dang nhap bang Gmail).
+  2. Nhan "Get API key" va copy ma khoa.
+  3. Tren thanh menu EcoAI, bam "Cai dat API Key" va dan vao.
+  * Luu y may phong Tin hoc: Khi het tiet hoc, hoc sinh bam "Xoa API Key" de bao mat.
+
+--------------------------------------------------------------------------------
+DANH SACH 5 PHAN HE TRONG UNG DUNG:
+--------------------------------------------------------------------------------
+1. TRANG CHU & BAN DO VIET NAM 3D:
+   - Ban do chu S tuong tac 5 diem nong sinh thai (Bac Bo, Mien Trung, Tay Nguyen, Nam Bo, Bien Dao).
+   - Khang dinh chu quyen quan dao Hoang Sa (Da Nang) va Truong Sa (Khanh Hoa).
+2. CO VAN XANH SOCRATIC AI:
+   - Tro ly dam thoai giai thich khoa hoc truoc, dat cau hoi goi mo Socratic sau.
+3. MAY TINH DAU CHAN CARBON:
+   - Dinh luong 4 nhom phat thai hoc duong, lo trinh 7 ngay song xanh luu tien do tu dong.
+4. PHAN LOAI RAC THONG MINH:
+   - Gemini Vision phan loai 3+1 nhom (keo tha anh, tu dong nen anh nhanh chong).
+   - Tuan thu Luat Bao ve du lieu ca nhan: Khong chup khuon mat nguoi.
+5. PHIEU HOC TAP & DANH GIA GDPT 2018 (SKKN):
+   - Doi chieu muc tieu GDPT 2018, trac nghiem Pre/Post-test va nut in phieu hoc tap.
+
+Chuc Thay/Co va cac em hoc sinh co nhung gio hoc sinh dong, bo ich cung EcoAI!
+Moi ho tro chuyen mon SKKN: Thay Ho Sy Long - Hotline: 0943278804.
+================================================================================

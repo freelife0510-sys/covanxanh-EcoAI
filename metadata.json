@@ -1,0 +1,6 @@
+{
+  "name": "EcoAI - Cố vấn Xanh",
+  "description": "Nền tảng giáo dục biến đổi khí hậu & phát triển bền vững cho học sinh THPT với Trợ lý AI Socratic, máy tính phát thải Carbon và nhận diện rác thải thông minh.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
