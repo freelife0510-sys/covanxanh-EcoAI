@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, Router } from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
@@ -14,6 +14,8 @@ dotenv.config();
 
 const app = express();
 app.use(express.json({ limit: '30mb' }));
+
+const router = Router();
 
 function getGeminiClient(customApiKey?: string): GoogleGenAI | null {
   const apiKey = customApiKey || process.env.GEMINI_API_KEY;
@@ -33,13 +35,13 @@ function getGeminiClient(customApiKey?: string): GoogleGenAI | null {
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 
 // Status endpoint
-app.get('/api/gemini/status', (_req: Request, res: Response) => {
+router.get('/gemini/status', (_req: Request, res: Response) => {
   const hasEnvKey = Boolean(process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'MY_GEMINI_API_KEY');
   res.json({ serverKeyConfigured: hasEnvKey });
 });
 
 // Export ZIP endpoint
-app.get('/api/export/zip', async (_req: Request, res: Response): Promise<void> => {
+router.get('/export/zip', async (_req: Request, res: Response): Promise<void> => {
   try {
     const zip = new JSZip();
     const rootDir = process.cwd();
@@ -97,7 +99,7 @@ app.get('/api/export/zip', async (_req: Request, res: Response): Promise<void> =
 });
 
 // 1. CHAT ENDPOINT
-app.post('/api/gemini/chat', async (req: Request, res: Response): Promise<void> => {
+router.post('/gemini/chat', async (req: Request, res: Response): Promise<void> => {
   try {
     const customKey = req.headers['x-gemini-api-key'] as string | undefined;
     const ai = getGeminiClient(customKey);
@@ -147,7 +149,7 @@ Nguyên tắc sư phạm:
 });
 
 // 2. CARBON DIAGNOSE ENDPOINT
-app.post('/api/gemini/carbon-diagnose', async (req: Request, res: Response): Promise<void> => {
+router.post('/gemini/carbon-diagnose', async (req: Request, res: Response): Promise<void> => {
   try {
     const customKey = req.headers['x-gemini-api-key'] as string | undefined;
     const ai = getGeminiClient(customKey);
@@ -228,7 +230,7 @@ Nhiệm vụ sư phạm:
 });
 
 // 3. WASTE CLASSIFY ENDPOINT
-app.post('/api/gemini/waste-classify', async (req: Request, res: Response): Promise<void> => {
+router.post('/gemini/waste-classify', async (req: Request, res: Response): Promise<void> => {
   try {
     const customKey = req.headers['x-gemini-api-key'] as string | undefined;
     const ai = getGeminiClient(customKey);
@@ -302,5 +304,9 @@ Hãy phân tích chi tiết:
     res.status(200).json({ analysis: null, isMock: true, error: String(error) });
   }
 });
+
+// Support both /api/* and /* paths seamlessly on Vercel
+app.use('/api', router);
+app.use('/', router);
 
 export default app;
