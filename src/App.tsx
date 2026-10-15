@@ -12,7 +12,6 @@ import { CarbonCalculator } from './components/CarbonCalculator';
 import { WasteClassifier } from './components/WasteClassifier';
 import { StudyAssessment } from './components/StudyAssessment';
 import { ApiKeyModal } from './components/ApiKeyModal';
-import { DownloadLocalModal } from './components/DownloadLocalModal';
 import { Footer } from './components/Footer';
 import { hasUserApiKey } from './services/geminiService';
 import { Info, MapPin, Calculator, Recycle, Award, ChevronRight } from 'lucide-react';
@@ -20,7 +19,6 @@ import { Info, MapPin, Calculator, Recycle, Award, ChevronRight } from 'lucide-r
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('home');
   const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
   const [hasCustomKey, setHasCustomKey] = useState(false);
   const [serverKeyAvailable, setServerKeyAvailable] = useState(false);
 
@@ -47,7 +45,7 @@ export default function App() {
     {
       step: '1',
       title: 'Khám phá',
-      subtitle: 'Bản đồ Khí hậu 3D',
+      subtitle: 'Bản đồ Khí hậu Atlat 3D',
       tab: 'home' as ActiveTab,
       icon: MapPin,
     },
@@ -67,8 +65,8 @@ export default function App() {
     },
     {
       step: '4',
-      title: 'Đánh giá & SKKN',
-      subtitle: 'Phiếu học tập A4',
+      title: 'Hiểu biết của bạn',
+      subtitle: 'Phiếu học tập và đánh giá',
       tab: 'assessment' as ActiveTab,
       icon: Award,
     },
@@ -86,7 +84,6 @@ export default function App() {
         activeTab={activeTab}
         onTabChange={setActiveTab}
         onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-        onOpenDownloadModal={() => setIsDownloadModalOpen(true)}
         hasCustomKey={hasCustomKey}
         serverKeyAvailable={serverKeyAvailable}
       />
@@ -102,12 +99,12 @@ export default function App() {
       )}
 
       {/* Pedagogical 4-Step Learning Roadmap Banner */}
-      <section aria-label="Mạch học tập GDPT 2018" className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-1">
+      <section aria-label="Mạch học tập" className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-1">
         <div className="bg-white/75 backdrop-blur-md border border-emerald-500/20 rounded-2xl p-2.5 sm:p-3 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2 shrink-0">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-              Mạch học tập GDPT 2018:
+              Mạch học tập:
             </span>
           </div>
 
@@ -156,7 +153,6 @@ export default function App() {
           <HomeHero
             onNavigate={setActiveTab}
             onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-            onOpenDownloadModal={() => setIsDownloadModalOpen(true)}
           />
         </section>
 
@@ -175,8 +171,8 @@ export default function App() {
           <WasteClassifier />
         </section>
 
-        {/* TAB 5: STUDY ASSESSMENT & SKKN */}
-        <section aria-label="Phiếu học tập và đánh giá" className={activeTab === 'assessment' ? 'block' : 'hidden'}>
+        {/* TAB 5: STUDY ASSESSMENT */}
+        <section aria-label="Hiểu biết của bạn - Phiếu học tập và đánh giá" className={activeTab === 'assessment' ? 'block' : 'hidden'}>
           <StudyAssessment />
         </section>
       </main>
@@ -188,14 +184,8 @@ export default function App() {
         onKeyUpdated={checkKeys}
       />
 
-      {/* Modal for Downloading Full Local Code & Setup Guide */}
-      <DownloadLocalModal
-        isOpen={isDownloadModalOpen}
-        onClose={() => setIsDownloadModalOpen(false)}
-      />
-
       {/* Educational Footer */}
-      <Footer onOpenDownloadModal={() => setIsDownloadModalOpen(true)} />
+      <Footer />
     </div>
   );
 }

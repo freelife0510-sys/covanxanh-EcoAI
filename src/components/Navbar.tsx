@@ -13,7 +13,6 @@ import {
   Sparkles,
   Globe2,
   Leaf,
-  Download,
   GraduationCap,
 } from 'lucide-react';
 import { ActiveTab } from '../types';
@@ -22,7 +21,6 @@ interface NavbarProps {
   activeTab: ActiveTab;
   onTabChange: (tab: ActiveTab) => void;
   onOpenApiKeyModal: () => void;
-  onOpenDownloadModal: () => void;
   hasCustomKey: boolean;
   serverKeyAvailable: boolean;
 }
@@ -31,7 +29,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   onTabChange,
   onOpenApiKeyModal,
-  onOpenDownloadModal,
   hasCustomKey,
   serverKeyAvailable,
 }) => {
@@ -65,7 +62,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       id: 'assessment',
       label: 'Phiếu học tập',
       icon: GraduationCap,
-      badge: 'SKKN',
+      badge: 'Đánh giá',
     },
   ];
 
@@ -149,20 +146,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Right Action: Download ZIP & API Key Button */}
+          {/* Right Action: API Key Button */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={onOpenDownloadModal}
-              className="relative flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-600/25 transition active:scale-95 group"
-              title="Tải toàn bộ mã nguồn ứng dụng & hướng dẫn chạy local về máy tính"
-            >
-              <Download className="w-3.5 h-3.5 text-white group-hover:translate-y-0.5 transition-transform" />
-              <span>Tải Về Máy (ZIP)</span>
-              <span className="flex h-2 w-2 relative -mr-0.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-200" />
-              </span>
-            </button>
 
             <button
               onClick={onOpenApiKeyModal}

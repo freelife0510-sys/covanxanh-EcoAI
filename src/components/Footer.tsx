@@ -4,13 +4,9 @@
  */
 
 import React from 'react';
-import { Leaf, Globe2, ShieldCheck, Heart, Sparkles, Phone, Download } from 'lucide-react';
+import { Leaf, Globe2, ShieldCheck, Heart, Sparkles, Phone, Smartphone } from 'lucide-react';
 
-interface FooterProps {
-  onOpenDownloadModal?: () => void;
-}
-
-export const Footer: React.FC<FooterProps> = ({ onOpenDownloadModal }) => {
+export const Footer: React.FC = () => {
   return (
     <footer className="w-full bg-white/95 border-t border-emerald-500/20 text-slate-600 py-12 px-4 sm:px-6 lg:px-8 mt-16 shadow-inner">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -58,19 +54,19 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDownloadModal }) => {
             </ul>
           </div>
 
-          {/* Col 3: Privacy & Security */}
+          {/* Col 3: Privacy & App Readiness */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-              Bảo Mật & Pháp Lý Dữ Liệu
+              Bảo Mật & Ứng Dụng Di Động
             </h4>
             <div className="text-xs space-y-2 text-slate-600">
               <div className="flex items-start gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                <span>Tuân thủ Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 & NĐ 356/2025/NĐ-CP: Ứng dụng không thu thập dữ liệu định danh học sinh, ảnh rác và câu hỏi được xử lý in-memory phục vụ mục tiêu học tập.</span>
+                <span>Tuân thủ Luật Bảo vệ dữ liệu cá nhân 91/2025/QH15 & NĐ 356/2025/NĐ-CP: Ứng dụng không thu thập dữ liệu định danh học sinh, ảnh rác và câu hỏi được xử lý in-memory.</span>
               </div>
               <div className="flex items-start gap-2">
-                <Globe2 className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
-                <span>Chuẩn hóa theo Chương trình GDPT 2018 (môn Địa lí, Sinh học, Hoạt động trải nghiệm).</span>
+                <Smartphone className="w-4 h-4 text-teal-600 shrink-0 mt-0.5" />
+                <span>Đạt chuẩn PWA, sẵn sàng cài đặt trên thiết bị Android, iOS và đóng gói xuất bản lên Google Play Store.</span>
               </div>
             </div>
           </div>
@@ -83,7 +79,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDownloadModal }) => {
             <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5 mt-1">
               <Phone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>
-                Ban Dự án Sáng kiến Kinh nghiệm EcoAI — Tác giả: Thầy Hồ Sỹ Long (Hotline chuyên môn:{' '}
+                Tác giả: Thầy Hồ Sỹ Long (Liên hệ chuyên môn:{' '}
                 <a href="tel:0943278804" className="hover:underline text-emerald-700 font-bold font-mono">
                   0943278804
                 </a>
@@ -91,21 +87,10 @@ export const Footer: React.FC<FooterProps> = ({ onOpenDownloadModal }) => {
               </span>
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 self-start sm:self-auto">
-            <button
-              type="button"
-              onClick={onOpenDownloadModal}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold transition shadow-sm"
-              title="Tải toàn bộ mã nguồn về máy tính (.ZIP)"
-            >
-              <Download className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Tải Mã Nguồn (.ZIP)</span>
-            </button>
-            <div className="flex items-center gap-1 text-slate-600 font-medium text-xs">
-              <span>Được thiết kế với tình yêu môi trường</span>
-              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
-              <span>cho học sinh THPT</span>
-            </div>
+          <div className="flex items-center gap-1 text-slate-600 font-medium text-xs">
+            <span>Được thiết kế với tình yêu môi trường</span>
+            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" />
+            <span>cho học sinh THPT</span>
           </div>
         </div>
       </div>

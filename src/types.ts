@@ -98,7 +98,7 @@ export interface QuizQuestion {
   options: string[];
   correctIndex: number;
   explanation: string;
-  subjectDomain: 'Địa lí' | 'Sinh học' | 'HĐTN';
+  subjectDomain: 'Địa lí' | 'Sinh học' | 'HĐTN' | 'Môi trường' | 'Khí hậu' | string;
 }
 
 export interface StudentStudyRecord {

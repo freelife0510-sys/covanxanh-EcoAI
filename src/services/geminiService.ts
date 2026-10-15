@@ -9,6 +9,7 @@ import {
   CarbonInputs,
   ChatMessage,
   GreenActionChallenge,
+  QuizQuestion,
   WasteAnalysisResult,
 } from '../types';
 
@@ -410,3 +411,223 @@ export async function classifyWasteImage(
     isFallbackWarning: true,
   };
 }
+
+// ==========================================
+// 4. DYNAMIC QUIZ GENERATOR (AI + BANK)
+// ==========================================
+
+export const CURATED_QUIZ_BANK: QuizQuestion[] = [
+  {
+    id: 101,
+    question: 'Theo Atlat Địa lí Việt Nam, ranh giới tự nhiên phân chia 2 miền khí hậu Bắc và Nam của nước ta là dãy núi nào?',
+    options: [
+      'Dãy Hoàng Liên Sơn',
+      'Dãy Bạch Mã (khoảng vĩ độ 16°B)',
+      'Dãy Hoành Sơn (Đèo Ngang)',
+      'Dãy Trường Sơn Nam',
+    ],
+    correctIndex: 1,
+    explanation: 'Dãy Bạch Mã đâm ngang ra biển ở khoảng vĩ tuyến 16°B (phía nam Thừa Thiên Huế/Đà Nẵng), là bức tường tự nhiên ngăn cản gió mùa Đông Bắc, phân định miền khí hậu phía Bắc (có mùa đông lạnh) và miền khí hậu phía Nam (nóng quanh năm).',
+    subjectDomain: 'Địa lí',
+  },
+  {
+    id: 102,
+    question: 'Tại sao vùng khí hậu Tây Bắc Bộ vào mùa đông lại có nền nhiệt đỡ lạnh hơn so với vùng Đông Bắc Bộ cùng vĩ độ?',
+    options: [
+      'Do nằm gần đường xích đạo hơn',
+      'Do có dãy núi cao Hoàng Liên Sơn chạy hướng Tây Bắc - Đông Nam chắn gió mùa Đông Bắc',
+      'Do có biển bao bọc điều hòa nhiệt độ',
+      'Do không có các khối không khí lạnh tràn về',
+    ],
+    correctIndex: 1,
+    explanation: 'Dãy Hoàng Liên Sơn cao đồ sộ (>2000-3000m) tạo bức bình phong chắn gió mùa Đông Bắc, khiến luồng gió lạnh từ phương bắc bị suy yếu khi tràn sang sườn phía tây, nên thung lũng Tây Bắc đỡ rét buốt hơn vùng Đông Bắc.',
+    subjectDomain: 'Địa lí',
+  },
+  {
+    id: 103,
+    question: 'Hiện tượng gió Phơn (gió Lào) ở vùng Bắc Trung Bộ vào đầu mùa hạ có đặc tính cực kỳ khô và nóng là do nguyên nhân nào?',
+    options: [
+      'Gió thổi trực tiếp từ sa mạc Gobi xuống',
+      'Gió mùa Tây Nam trút hết mưa ở sườn tây Trường Sơn (Lào), khi vượt đỉnh sang sườn đông bị nén đoạn nhiệt khô và nóng lên',
+      'Do nhiệt độ cát ven biển đốt nóng không khí',
+      'Do ảnh hưởng của các tâm áp thấp trên Biển Đông',
+    ],
+    correctIndex: 1,
+    explanation: 'Khi khối khí ẩm Tây Nam từ Vịnh Bengal leo dốc sườn Tây Trường Sơn gây mưa lớn, khi sang sườn Đông (Việt Nam) đã cạn ẩm và hạ dốc theo quy luật đoạn nhiệt khô (cứ xuống 100m nhiệt độ tăng 1°C), tạo thành luồng gió Phơn khô rát.',
+    subjectDomain: 'Địa lí',
+  },
+  {
+    id: 104,
+    question: 'Đặc điểm mùa mưa ở vùng khí hậu Nam Trung Bộ có sự khác biệt rõ rệt nào so với các vùng khí hậu khác của nước ta?',
+    options: [
+      'Mưa chủ yếu vào các tháng mùa xuân',
+      'Mưa lệch hẳn về thời kỳ thu - đông (từ tháng 9 đến tháng 12)',
+      'Không có mùa mưa trong năm',
+      'Mưa đều đặn suốt 12 tháng không đổi',
+    ],
+    correctIndex: 1,
+    explanation: 'Vùng Nam Trung Bộ có địa hình sườn đón gió mùa Đông Bắc qua biển kết hợp dải hội tụ nhiệt đới và bão, tạo nên mùa mưa muộn lệch về thu đông (tháng 9-12), trong khi mùa hè lại khô hạn.',
+    subjectDomain: 'Địa lí',
+  },
+  {
+    id: 105,
+    question: 'Theo quy luật khí hậu nhiệt đới gió mùa của Việt Nam, hướng di chuyển và thời gian đổ bộ của bão biến động như thế nào?',
+    options: [
+      'Bão xuất hiện đồng loạt trên cả nước vào tháng 1',
+      'Bão đổ bộ từ Nam ra Bắc, sớm nhất ở Cà Mau',
+      'Bão di chuyển chậm dần từ Bắc vào Nam (tháng 6-8 ở Bắc Bộ, tháng 9-11 ở Trung Bộ, tháng 12 ở Nam Bộ)',
+      'Chỉ duy nhất miền Trung có bão, miền Bắc và Nam không có',
+    ],
+    correctIndex: 2,
+    explanation: 'Theo Atlat Địa lí Việt Nam, tâm bão và dải hội tụ nhiệt đới dịch chuyển dần từ bắc xuống nam theo chuyển động biểu kiến của Mặt Trời: tháng 6-8 bão vào Bắc Bộ, tháng 9-11 dồn dập vào Trung Bộ, tháng 12 dịch xuống Nam Bộ.',
+    subjectDomain: 'Địa lí',
+  },
+  {
+    id: 106,
+    question: 'Quần đảo Hoàng Sa và Quần đảo Trường Sa thiêng liêng của Việt Nam lần lượt thuộc đơn vị hành chính nào?',
+    options: [
+      'Huyện Hoàng Sa (TP. Đà Nẵng) và Huyện Trường Sa (tỉnh Khánh Hòa)',
+      'Huyện Hoàng Sa (tỉnh Quảng Nam) và Huyện Trường Sa (tỉnh Ninh Thuận)',
+      'Cả hai cùng thuộc tỉnh Bình Định',
+      'Huyện đảo Phú Quốc (Kiên Giang)',
+    ],
+    correctIndex: 0,
+    explanation: 'Nhà nước Việt Nam xác lập chủ quyền liên tục và hòa bình: Quần đảo Hoàng Sa trực thuộc huyện Hoàng Sa (TP. Đà Nẵng) và Quần đảo Trường Sa trực thuộc huyện Trường Sa (tỉnh Khánh Hòa).',
+    subjectDomain: 'Địa lí',
+  },
+  {
+    id: 107,
+    question: 'Theo số liệu nghiên cứu công bố năm 2024 (ĐH Bách khoa Hà Nội & Bộ TN&MT), hệ số phát thải của lưới điện Việt Nam là bao nhiêu?',
+    options: [
+      'Khoảng 0.15 tCO2e/MWh',
+      'Khoảng 0.681 tCO2e/MWh (~0.681 kg CO2 cho mỗi kWh điện)',
+      'Bằng 0 vì sử dụng 100% năng lượng mặt trời',
+      'Khoảng 2.5 tCO2e/MWh',
+    ],
+    correctIndex: 1,
+    explanation: 'Hệ số lưới điện Việt Nam đạt ~0.681 tCO2e/MWh do cơ cấu điện lực vẫn còn nhiệt điện than, vì vậy mỗi kWh điện học sinh tiết kiệm được tương đương giảm trực tiếp gần 0.7 kg CO2 vào bầu khí quyển.',
+    subjectDomain: 'Môi trường',
+  },
+  {
+    id: 108,
+    question: 'Tại sao việc duy trì nhiệt độ điều hòa ở mức 26°C - 27°C kèm bật quạt gió lại là hành động tiết kiệm điện tối ưu cho trường học?',
+    options: [
+      'Vì điều hòa sẽ tự động tắt khi để 26°C',
+      'Vì mỗi 1°C cài đặt tăng lên giúp giảm từ 7% đến 10% lượng điện tiêu thụ của máy nén, trong khi gió quạt vẫn mang lại cảm giác mát mẻ',
+      'Vì 26°C là nhiệt độ của băng tan',
+      'Không có sự khác biệt giữa 18°C và 26°C',
+    ],
+    correctIndex: 1,
+    explanation: 'Khi đặt nhiệt độ điều hòa ở 26-27°C, máy nén làm việc ít hơn, chênh lệch nhiệt độ với môi trường ngoài giảm, tiết kiệm 7-10% điện năng mỗi độ C, kết hợp quạt gió giúp lưu thông không khí thoáng mát.',
+    subjectDomain: 'Môi trường',
+  },
+  {
+    id: 109,
+    question: 'Theo quy định của Luật Bảo vệ môi trường 2020, chất thải rắn sinh hoạt bắt buộc phải phân loại thành những nhóm nào?',
+    options: [
+      'Rác đốt được và rác không đốt được',
+      '3 nhóm: Rác tái sử dụng/tái chế, Chất thải thực phẩm, và Chất thải rắn sinh hoạt khác (kèm lưu trữ an toàn rác nguy hại)',
+      'Chỉ cần gom chung vào túi nilon đen',
+      '5 nhóm không có quy định phân loại thực phẩm',
+    ],
+    correctIndex: 1,
+    explanation: 'Khoản 1 Điều 75 Luật BVMT 2020 quy định phân loại 3 nhóm: 1. Chất thải rắn có khả năng tái sử dụng, tái chế; 2. Chất thải thực phẩm; 3. Chất thải rắn sinh hoạt khác. Rác nguy hại như pin, bóng đèn hỏng được quản lý riêng.',
+    subjectDomain: 'Sinh học',
+  },
+  {
+    id: 110,
+    question: 'Pin cũ, ắc quy và bóng đèn huỳnh quang hỏng tại trường học thuộc nhóm chất thải nào và phải xử lý ra sao?',
+    options: [
+      'Thuộc rác hữu cơ, có thể chôn vào gốc cây',
+      'Thuộc rác nguy hại học đường; phải gom vào hộp riêng và gửi về các điểm thu hồi chuyên trách, tuyệt đối không vứt vào thùng rác thường',
+      'Đốt cùng lá cây trong sân trường',
+      'Nghiền nát rồi đổ xuống cống',
+    ],
+    correctIndex: 1,
+    explanation: 'Pin và bóng đèn chứa thủy ngân, chì, cadmi cực độc. Khi rò rỉ ra môi trường, 1 viên pin có thể gây ô nhiễm 500 lít nước sạch hoặc 1m3 đất suốt 50 năm, gây hại nghiêm trọng cho sức khỏe con người.',
+    subjectDomain: 'Sinh học',
+  },
+  {
+    id: 111,
+    question: 'Một chiếc túi nilon hoặc cốc nhựa trà sữa một lần khi vứt ra bãi chôn lấp tự nhiên cần khoảng bao nhiêu năm để phân hủy hoàn toàn?',
+    options: [
+      'Khoảng 2 - 3 tuần',
+      'Khoảng 6 tháng đến 1 năm',
+      'Khoảng 400 - 500 năm, phân rã thành vi nhựa độc hại',
+      'Không bao giờ bị phân rã dù chỉ một phần',
+    ],
+    correctIndex: 2,
+    explanation: 'Nhựa dùng một lần có liên kết polyme nhân tạo rất bền vững, mất 400-500 năm mới phân rã ngoài tự nhiên, phân tách thành các hạt vi nhựa (microplastics) đi vào chuỗi thức ăn và nguồn nước uống.',
+    subjectDomain: 'Sinh học',
+  },
+  {
+    id: 112,
+    question: 'Hành động nào của học sinh THPT đem lại hiệu quả kép vừa giảm rác nhựa dùng một lần vừa tiết kiệm chi tiêu?',
+    options: [
+      'Mang theo bình nước giữ nhiệt cá nhân để lấy nước sạch từ máy lọc trường học thay vì mua nước đóng chai',
+      'Mỗi ngày mua 2 cốc trà sữa mang đi',
+      'Bọc tất cả sách vở bằng nhiều lớp nilon dẻo',
+      'Vứt chai nhựa vào thùng rác thực phẩm',
+    ],
+    correctIndex: 0,
+    explanation: 'Sử dụng bình nước cá nhân giúp một học sinh giảm phát thải trung bình 150-200 chai/ly nhựa mỗi năm, đồng thời hình thành nếp sống văn minh học đường.',
+    subjectDomain: 'HĐTN',
+  },
+  {
+    id: 113,
+    question: 'Mục tiêu "Net Zero 2050" mà Thủ tướng Chính phủ Việt Nam cam kết tại Hội nghị COP26 mang ý nghĩa gì?',
+    options: [
+      'Việt Nam sẽ không sử dụng bất kỳ nguồn điện nào vào năm 2050',
+      'Đạt mức phát thải ròng bằng 0, nghĩa là lượng khí nhà kính phát thải tương đương lượng được hấp thụ bởi rừng và công nghệ lưu trữ carbon',
+      'Ngừng toàn bộ hoạt động giao thông vận tải',
+      'Chỉ áp dụng cho các nước phát triển, không liên quan đến học sinh',
+    ],
+    correctIndex: 1,
+    explanation: 'Net Zero 2050 là trạng thái cân bằng sinh thái: tổng lượng khí nhà kính phát thải do con người tạo ra được bù đắp và hấp thụ hoàn toàn bằng rừng phòng hộ, rừng ngập mặn và công nghệ xanh, bảo vệ khí hậu Trái Đất.',
+    subjectDomain: 'HĐTN',
+  },
+  {
+    id: 114,
+    question: 'Phân loại rác thực phẩm (vỏ hoa quả, thức ăn thừa) tại trường học đem lại giá trị sinh thái nổi bật nào?',
+    options: [
+      'Có thể ủ thành phân bón hữu cơ compost giàu dinh dưỡng cho vườn cây học sinh và tránh làm ướt, bốc mùi rác tái chế',
+      'Làm tăng khối lượng rác chôn lấp',
+      'Để đốt nhanh hơn',
+      'Làm hỏng các loại rác khác',
+    ],
+    correctIndex: 0,
+    explanation: 'Rác thực phẩm chiếm hơn 50% khối lượng rác sinh hoạt. Khi tách riêng, rác thực phẩm có thể ủ thành phân hữu cơ bón cho cây, giảm phát thải khí metan (CH4) tại các bãi rác lộ thiên.',
+    subjectDomain: 'Sinh học',
+  },
+];
+
+export async function generateDynamicQuiz(): Promise<{ questions: QuizQuestion[]; isMock: boolean }> {
+  const customKey = getStoredApiKey();
+
+  try {
+    const response = await fetch('/api/gemini/generate-quiz', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(customKey ? { 'x-gemini-api-key': customKey } : {}),
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data.questions) && data.questions.length >= 5) {
+        return { questions: data.questions.slice(0, 5), isMock: false };
+      }
+    }
+  } catch {
+    // Graceful fallback to dynamic shuffled bank
+  }
+
+  // Shuffle and pick 5 distinct questions from curated bank
+  const shuffled = [...CURATED_QUIZ_BANK].sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, 5).map((q, idx) => ({ ...q, id: idx + 1 }));
+
+  return { questions: selected, isMock: true };
+}
+

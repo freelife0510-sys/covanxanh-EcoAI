@@ -305,6 +305,68 @@ Hãy phân tích chi tiết:
   }
 });
 
+// 4. DYNAMIC AI QUIZ GENERATION ENDPOINT
+router.post('/gemini/generate-quiz', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const customKey = req.headers['x-gemini-api-key'] as string | undefined;
+    const ai = getGeminiClient(customKey);
+
+    if (!ai) {
+      res.status(200).json({ questions: null, isMock: true, reason: 'no_api_key' });
+      return;
+    }
+
+    const prompt = `Bạn là chuyên gia sư phạm bộ môn Địa lí, Sinh học và Hoạt động trải nghiệm THPT Việt Nam.
+Hãy tạo ngẫu nhiên một bộ 5 câu hỏi trắc nghiệm mới lạ (mỗi câu 4 lựa chọn A, B, C, D) kiểm tra kiến thức và nhận thức môi trường của học sinh THPT:
+Nội dung 5 câu bao gồm:
+- Câu 1: Về Khí hậu Việt Nam theo Atlat Địa lí Việt Nam (2 miền khí hậu Bắc - Nam ngăn bởi dãy Bạch Mã, hoặc 7 vùng khí hậu, gió mùa Đông Bắc, gió mùa Tây Nam, gió phơn Tây Nam khô nóng, hoặc quy luật di chuyển của bão theo các tháng).
+- Câu 2: Về tính toán Dấu chân Carbon, hệ số phát thải lưới điện Việt Nam 2024 (~0.681 tCO2e/MWh) hoặc ý nghĩa tiết kiệm năng lượng tại trường học.
+- Câu 3: Về Phân loại rác thải sinh hoạt theo Luật Bảo vệ môi trường 2020 (3 nhóm: Rác tái chế, Rác thực phẩm, Rác sinh hoạt khác) và xử lý rác nguy hại học đường (pin cũ, bóng đèn hỏng).
+- Câu 4: Tác hại môi trường của rác thải nhựa dùng 1 lần hoặc thời gian phân hủy của đồ nhựa/hộp xốp trong tự nhiên.
+- Câu 5: Hành vi, lối sống xanh thiết thực học đường hướng tới Net Zero 2050 (đi xe đạp/buýt điện, dùng bình nước cá nhân, giữ nhiệt độ điều hòa 26°C...).
+
+Mỗi câu hỏi cần:
+- question: Câu hỏi súc tích, rõ ràng, giàu tính thực tiễn Việt Nam.
+- options: Mảng đúng 4 đáp án (1 đáp án đúng và 3 đáp án nhiễu hợp lý).
+- correctIndex: Chỉ số đáp án đúng (0, 1, 2, hoặc 3).
+- explanation: Lời giải thích khoa học ngắn gọn (2-3 câu) vì sao đáp án đó đúng.
+- subjectDomain: Một trong các môn: 'Địa lí' | 'Sinh học' | 'HĐTN' | 'Môi trường'.`;
+
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              id: { type: Type.INTEGER },
+              question: { type: Type.STRING },
+              options: {
+                type: Type.ARRAY,
+                items: { type: Type.STRING },
+              },
+              correctIndex: { type: Type.INTEGER },
+              explanation: { type: Type.STRING },
+              subjectDomain: { type: Type.STRING },
+            },
+            required: ['id', 'question', 'options', 'correctIndex', 'explanation', 'subjectDomain'],
+          },
+        },
+      },
+    });
+
+    const responseText = response.text || '[]';
+    const parsed = JSON.parse(responseText);
+    res.json({ questions: parsed, isMock: false });
+  } catch (error) {
+    console.error('Error in /api/gemini/generate-quiz:', error);
+    res.status(200).json({ questions: null, isMock: true, error: String(error) });
+  }
+});
+
 // Support both /api/* and /* paths seamlessly on Vercel
 app.use('/api', router);
 app.use('/', router);

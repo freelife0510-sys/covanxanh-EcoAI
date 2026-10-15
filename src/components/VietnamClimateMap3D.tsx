@@ -6,634 +6,920 @@
 import React, { useState } from 'react';
 import {
   Compass,
-  Shield,
+  MapPin,
   Sparkles,
-  Mountain,
   CloudRain,
-  TreePine,
-  Waves,
-  Flag,
-  CheckCircle2,
-  AlertCircle,
-  Lightbulb,
   Thermometer,
-  Droplets,
   Wind,
-  Award,
+  Flag,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
   Layers,
+  ChevronRight,
+  Info,
+  CheckCircle2,
+  Maximize2,
+  Flame,
+  AlertTriangle,
 } from 'lucide-react';
 
-export interface RegionalClimateData {
+export interface ClimateStationData {
   id: string;
   name: string;
-  shortName: string;
-  subRegion: string;
-  coords: { x: number; y: number };
-  color: string;
-  gradient: string;
-  slogan: string;
-  temperatureRange: string;
+  regionId: string;
+  regionName: string;
+  domain: 'Bắc' | 'Nam';
+  atlatCoords: { top: string; left: string }; // Position percentage on Atlat map
+  map3DCoords: { x: number; y: number };
+  tempAnnual: string;
+  tempMinMax: string;
+  tempAmp: string; // Biên độ nhiệt
   rainfallAnnual: string;
-  climateRiskLevel: 'Rất Cao' | 'Cao' | 'Trung Bình';
-  challenges: string;
-  solutions: string;
+  rainySeason: string;
+  specialPhenomena: string;
+  riskFactor: string;
   schoolAction: string;
-  suggestedProject: string;
-  icon: React.ElementType;
+  // 12 months data for rainfall (mm) and temperature (°C)
+  monthlyRain: number[]; // 12 values
+  monthlyTemp: number[]; // 12 values
 }
 
-export const VIETNAM_REGIONS: RegionalClimateData[] = [
+export interface ClimateZone {
+  id: string;
+  name: string;
+  domain: 'Bắc' | 'Nam';
+  color: string;
+  borderColor: string;
+  description: string;
+  keyFeatures: string;
+  stations: string[];
+}
+
+export const CLIMATE_ZONES: ClimateZone[] = [
   {
-    id: 'north',
-    name: 'Bắc Bộ & Thủ Đô Hà Nội',
-    shortName: 'Bắc Bộ',
-    subRegion: 'Đồng bằng sông Hồng & Trung du miền núi phía Bắc',
-    coords: { x: 175, y: 78 },
-    color: '#059669',
-    gradient: 'from-emerald-600 to-teal-700',
-    slogan: 'Năng Lượng Sạch & Giao Thông Xanh Học Đường',
-    temperatureRange: '15°C - 39°C (Biên độ nhiệt năm lớn)',
-    rainfallAnnual: '1.600 - 2.000 mm/năm',
-    climateRiskLevel: 'Cao',
-    challenges: 'Ô nhiễm không khí bụi mịn PM2.5 vào mùa đông do nghịch nhiệt; các đợt nắng nóng gay gắt đầu hè làm tăng tải lưới điện.',
-    solutions: 'Mở rộng vành đai xanh đô thị, thúc đẩy xe buýt điện công cộng và phát triển điện gió ngoài khơi Bạch Long Vĩ.',
-    schoolAction: 'Ưu tiên đi xe buýt điện, xe đạp, tích cực tham gia trồng cây xanh khuôn viên trường và tắt điều hòa sớm 30 phút.',
-    suggestedProject: 'Bản đồ chất lượng không khí học đường & Chiến dịch "Lớp học không khói xe".',
-    icon: Mountain,
+    id: 'tay-bac',
+    name: 'Vùng khí hậu Tây Bắc Bộ',
+    domain: 'Bắc',
+    color: '#10b981',
+    borderColor: '#059669',
+    description: 'Địa hình núi cao Hoàng Liên Sơn chắn gió mùa Đông Bắc, tạo mùa đông đỡ lạnh hơn Đông Bắc Bộ và mùa hè có gió phơn khô nóng.',
+    keyFeatures: 'Mùa đông ít lạnh hơn Đông Bắc; thung lũng ấm áp; sườn đón gió mưa lớn.',
+    stations: ['dien-bien', 'sa-pa'],
   },
   {
-    id: 'central',
-    name: 'Miền Trung Kiên Cường',
-    shortName: 'Miền Trung',
-    subRegion: 'Bắc Trung Bộ & Duyên hải Nam Trung Bộ',
-    coords: { x: 235, y: 168 },
-    color: '#d97706',
-    gradient: 'from-amber-600 to-orange-700',
-    slogan: 'Lá Chắn Rừng Phòng Hộ — Thích Ứng Siêu Bão & Gió Lào',
-    temperatureRange: '18°C - 41°C (Gió Phơn khô rát mùa hè)',
-    rainfallAnnual: '1.800 - 2.800 mm/năm (Mưa dồn dập tháng 9 - 11)',
-    climateRiskLevel: 'Rất Cao',
-    challenges: 'Hứng chịu bão lũ dồn dập cuối năm, sạt lở đất sườn đông Trường Sơn và hiện tượng gió Phơn Tây Nam khô nóng cực đoan.',
-    solutions: 'Trồng rừng phòng hộ chắn cát ven biển (phi lao, bàng biển), giữ rừng tự nhiên đầu nguồn Trường Sơn và xây trường học kiên cố chống bão.',
-    schoolAction: 'Học sinh tham gia diễn tập an toàn thiên tai, xây dựng bản đồ số các điểm tránh lũ an toàn tại địa phương.',
-    suggestedProject: 'Mô hình "Trường học Thích ứng Lũ lụt" & Vườn ươm phi lao chắn sóng học sinh.',
-    icon: CloudRain,
+    id: 'dong-bac',
+    name: 'Vùng khí hậu Đông Bắc Bộ',
+    domain: 'Bắc',
+    color: '#047857',
+    borderColor: '#065f46',
+    description: 'Địa hình các cánh cung mở rộng về phía bắc đón trực tiếp gió mùa Đông Bắc, là vùng có mùa đông lạnh nhất cả nước.',
+    keyFeatures: 'Mùa đông lạnh đến sớm và kết thúc muộn; mưa phùn cuối đông; chịu ảnh hưởng bão tháng 6-8.',
+    stations: ['lang-son'],
   },
   {
-    id: 'highlands',
-    name: 'Tây Nguyên Đại Ngàn',
-    shortName: 'Tây Nguyên',
-    subRegion: 'Vùng cao nguyên bazan 5 tỉnh Tây Nguyên',
-    coords: { x: 252, y: 242 },
-    color: '#0d9488',
-    gradient: 'from-teal-600 to-emerald-800',
-    slogan: 'Bảo Vệ Rừng Đầu Nguồn & Giữ Vững Mạch Nước Ngầm',
-    temperatureRange: '16°C - 33°C (Khí hậu cao nguyên 2 mùa rõ rệt)',
-    rainfallAnnual: '1.900 - 2.500 mm/năm',
-    climateRiskLevel: 'Cao',
-    challenges: 'Suy giảm tầng nước ngầm nghiêm trọng, khô hạn kéo dài mùa khô ảnh hưởng nặng nề đến tưới tiêu cà phê, hồ tiêu.',
-    solutions: 'Phục hồi độ che phủ rừng tự nhiên, áp dụng kỹ thuật tưới nhỏ giọt tiết kiệm nước và trữ nước hồ sinh thái.',
-    schoolAction: 'Thực hành tiết kiệm nước từng giọt tại trường nội trú, trồng cây che phủ đất và tuyên truyền bảo vệ động vật hoang dã.',
-    suggestedProject: 'Hệ thống tưới cây tự động bằng cảm biến độ ẩm đất trong khuôn viên trường học.',
-    icon: TreePine,
-  },
-  {
-    id: 'south',
-    name: 'Nam Bộ & ĐBSCL',
-    shortName: 'ĐBSCL & Nam Bộ',
-    subRegion: 'Đông Nam Bộ & Đồng bằng sông Cửu Long',
-    coords: { x: 195, y: 318 },
+    id: 'trung-nam-bac-bo',
+    name: 'Vùng khí hậu Trung và Nam Bắc Bộ',
+    domain: 'Bắc',
     color: '#0284c7',
-    gradient: 'from-cyan-600 to-blue-700',
-    slogan: 'Sống Chung Với Hạn Mặn — Giữ Vững Vựa Lúa Quốc Gia',
-    temperatureRange: '25°C - 36°C (Cận xích đạo nóng ẩm quanh năm)',
-    rainfallAnnual: '1.400 - 2.200 mm/năm',
-    climateRiskLevel: 'Rất Cao',
-    challenges: 'Xâm nhập mặn sâu 50 - 70km vào nội đồng, sạt lở bờ sông kênh rạch, triều cường đô thị và nước biển dâng.',
-    solutions: 'Chuyển đổi cơ cấu cây trồng thích ứng mặn, bảo vệ và phục hồi rừng ngập mặn Cà Mau, Trà Vinh, trữ nước mưa.',
-    schoolAction: 'Học sinh tiên phong trữ nước mưa sinh hoạt, nói không với túi nilon làm tắc nghẽn kênh rạch Nam Bộ.',
-    suggestedProject: 'Trạm lọc và đo độ mặn nước ngọt trường học & Vườn ươm mầm đước xanh.',
-    icon: Waves,
+    borderColor: '#0369a1',
+    description: 'Bao gồm Đồng bằng sông Hồng và duyên hải vịnh Bắc Bộ. Mùa đông lạnh ẩm, mùa hè nóng ẩm mưa nhiều.',
+    keyFeatures: 'Mưa nhiều tháng 7-8; bão đổ bộ nhiều tháng 7-8; biên độ nhiệt năm lớn (~12-13°C).',
+    stations: ['ha-noi'],
   },
   {
-    id: 'islands',
-    name: 'Biển Đảo Hoàng Sa & Trường Sa',
-    shortName: 'Biển Đảo Quê Hương',
-    subRegion: 'Quần đảo Hoàng Sa (Đà Nẵng) & Quần đảo Trường Sa (Khánh Hòa)',
-    coords: { x: 330, y: 218 },
-    color: '#e11d48',
-    gradient: 'from-rose-600 to-red-700',
-    slogan: 'Bảo Vệ Đại Dương Xanh & Khẳng Định Chủ Quyền Thiêng Liêng',
-    temperatureRange: '26°C - 34°C (Khí hậu hải dương nhiệt đới)',
-    rainfallAnnual: '2.000 - 2.600 mm/năm',
-    climateRiskLevel: 'Rất Cao',
-    challenges: 'Rác thải nhựa trôi nổi đại dương, hiện tượng axit hóa nước biển và biến đổi khí hậu gây tẩy trắng các rạn san hô quý.',
-    solutions: 'Kiểm soát xả thải nhựa từ đất liền, bảo tồn các khu bảo tồn biển và phát triển năng lượng gió, mặt trời trên các đảo.',
-    schoolAction: 'Cự tuyệt tuyệt đối sản phẩm nhựa dùng một lần, tìm hiểu luật biển và lan tỏa tình yêu chủ quyền biển đảo Tổ quốc.',
-    suggestedProject: 'Chiến dịch học đường "Triệu Lời Cam Kết Vì Biển Đảo Hoàng Sa — Trường Sa Không Rác Thải Nhựa".',
-    icon: Flag,
+    id: 'bac-trung-bo',
+    name: 'Vùng khí hậu Bắc Trung Bộ',
+    domain: 'Bắc',
+    color: '#eab308',
+    borderColor: '#ca8a04',
+    description: 'Từ dãy Tam Điệp tới dãy Bạch Mã. Mùa hạ chịu gió phơn Tây Nam (gió Lào) cực kỳ khô nóng; thu đông mưa lớn và bão dồn dập.',
+    keyFeatures: 'Gió Tây khô nóng gay gắt tháng 5-7; mưa bão dữ dội tháng 9-11; lũ quét đầu nguồn.',
+    stations: ['dong-hoi'],
+  },
+  {
+    id: 'nam-trung-bo',
+    name: 'Vùng khí hậu Nam Trung Bộ',
+    domain: 'Nam',
+    color: '#f59e0b',
+    borderColor: '#d97706',
+    description: 'Từ phía nam Bạch Mã đến Bình Thuận. Mùa mưa lệch hẳn về thu đông (tháng 9-12); mùa khô kéo dài, hạn hán khốc liệt nhất nước.',
+    keyFeatures: 'Mưa lệch thu đông do sườn đón gió mùa qua biển; Ninh Thuận - Bình Thuận khô hạn nhất nước.',
+    stations: ['da-nang', 'nha-trang'],
+  },
+  {
+    id: 'tay-nguyen',
+    name: 'Vùng khí hậu Tây Nguyên',
+    domain: 'Nam',
+    color: '#d97706',
+    borderColor: '#b45309',
+    description: 'Khí hậu cận xích đạo gió mùa có tính chất phân hóa theo độ cao trên các cao nguyên bazan; 2 mùa mưa và khô tương phản sâu sắc.',
+    keyFeatures: 'Đà Lạt mát lạnh quanh năm; mùa khô thiếu nước nghiêm trọng; mùa mưa lũ ống lũ quét.',
+    stations: ['da-lat'],
+  },
+  {
+    id: 'nam-bo',
+    name: 'Vùng khí hậu Nam Bộ',
+    domain: 'Nam',
+    color: '#ea580c',
+    borderColor: '#c2410c',
+    description: 'Bao gồm Đông Nam Bộ và Đồng bằng sông Cửu Long. Nền nhiệt cao và ổn định quanh năm (>26-27°C), biên độ nhiệt năm rất nhỏ (<3°C).',
+    keyFeatures: 'Mùa mưa tháng 5-11 chiếm >85% lượng mưa; mùa khô kéo dài gây xâm nhập mặn và triều cường ngập úng.',
+    stations: ['tp-hcm', 'can-tho', 'ca-mau'],
+  },
+];
+
+export const CLIMATE_STATIONS: ClimateStationData[] = [
+  {
+    id: 'sa-pa',
+    name: 'Trạm Sa Pa (Lào Cai)',
+    regionId: 'tay-bac',
+    regionName: 'Tây Bắc Bộ',
+    domain: 'Bắc',
+    atlatCoords: { top: '8.5%', left: '33%' },
+    map3DCoords: { x: 130, y: 35 },
+    tempAnnual: '15.2°C',
+    tempMinMax: '8.4°C (tháng 1) — 19.8°C (tháng 7)',
+    tempAmp: '11.4°C',
+    rainfallAnnual: '2.680 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 9 (đỉnh mưa tháng 7-8 đạt >480 mm)',
+    specialPhenomena: 'Khí hậu núi cao á nhiệt đới, mùa đông có băng giá và tuyết rơi, độ ẩm quanh năm rất cao.',
+    riskFactor: 'Rét hại, sương muối, sạt lở đất trên các sườn dốc Hoàng Liên Sơn.',
+    schoolAction: 'Tham gia bảo vệ thảm thực vật rừng tự nhiên để chống trượt lở đất và giữ nguồn sinh thủy.',
+    monthlyTemp: [8.4, 9.8, 13.5, 17.2, 19.1, 19.8, 19.7, 19.3, 17.8, 14.9, 12.0, 9.2],
+    monthlyRain: [35, 45, 80, 190, 320, 390, 485, 450, 310, 180, 65, 30],
+  },
+  {
+    id: 'dien-bien',
+    name: 'Trạm Điện Biên Phủ',
+    regionId: 'tay-bac',
+    regionName: 'Tây Bắc Bộ',
+    domain: 'Bắc',
+    atlatCoords: { top: '14%', left: '25%' },
+    map3DCoords: { x: 105, y: 55 },
+    tempAnnual: '21.8°C',
+    tempMinMax: '16.2°C (tháng 1) — 26.1°C (tháng 6)',
+    tempAmp: '9.9°C',
+    rainfallAnnual: '1.620 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 9',
+    specialPhenomena: 'Thung lũng kín gió, mùa đông đỡ buốt hơn Đông Bắc, đầu hè có gió phơn khô nóng.',
+    riskFactor: 'Lũ quét cục bộ, hạn hán đầu mùa mưa.',
+    schoolAction: 'Tiết kiệm nước sinh hoạt và tham gia trồng rừng phủ xanh đất trống đồi trọc.',
+    monthlyTemp: [16.2, 18.0, 21.5, 24.8, 25.9, 26.1, 25.8, 25.4, 24.5, 22.2, 19.3, 16.5],
+    monthlyRain: [20, 25, 50, 120, 220, 260, 310, 290, 160, 70, 40, 15],
+  },
+  {
+    id: 'lang-son',
+    name: 'Trạm Lạng Sơn',
+    regionId: 'dong-bac',
+    regionName: 'Đông Bắc Bộ',
+    domain: 'Bắc',
+    atlatCoords: { top: '11.5%', left: '50%' },
+    map3DCoords: { x: 195, y: 48 },
+    tempAnnual: '21.2°C',
+    tempMinMax: '13.3°C (tháng 1) — 27.2°C (tháng 7)',
+    tempAmp: '13.9°C (Biên độ nhiệt lớn)',
+    rainfallAnnual: '1.450 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 9',
+    specialPhenomena: 'Đón luồng gió mùa Đông Bắc sớm và mạnh nhất, số ngày rét đậm rét hại nhiều nhất nước.',
+    riskFactor: 'Sương muối, băng giá làm chết cây trồng và gia súc.',
+    schoolAction: 'Chống rét cho lớp học, tham gia chiến dịch giữ ấm cho học sinh vùng cao.',
+    monthlyTemp: [13.3, 14.5, 18.2, 22.5, 25.8, 27.0, 27.2, 26.8, 25.1, 22.0, 18.2, 14.6],
+    monthlyRain: [25, 30, 55, 105, 190, 240, 275, 260, 150, 75, 35, 15],
+  },
+  {
+    id: 'ha-noi',
+    name: 'Trạm Hà Nội (Thủ đô)',
+    regionId: 'trung-nam-bac-bo',
+    regionName: 'Trung và Nam Bắc Bộ',
+    domain: 'Bắc',
+    atlatCoords: { top: '17.5%', left: '42%' },
+    map3DCoords: { x: 170, y: 72 },
+    tempAnnual: '23.6°C',
+    tempMinMax: '16.4°C (tháng 1) — 29.2°C (tháng 6-7)',
+    tempAmp: '12.8°C',
+    rainfallAnnual: '1.680 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 10 (đỉnh mưa tháng 7-8)',
+    specialPhenomena: 'Mùa đông lạnh và có mưa phùn ẩm ướt vào nửa cuối; mùa hè oi bức, hiệu ứng đảo nhiệt đô thị.',
+    riskFactor: 'Ngập lụt đô thị khi mưa lớn, ô nhiễm bụi mịn mùa đông do nghịch nhiệt.',
+    schoolAction: 'Sử dụng xe đạp và phương tiện công cộng (xe buýt điện/metro), giảm rác nhựa trường học.',
+    monthlyTemp: [16.4, 17.2, 20.0, 23.9, 27.4, 29.2, 29.0, 28.5, 27.2, 24.6, 21.4, 18.1],
+    monthlyRain: [18, 26, 45, 90, 190, 240, 295, 320, 250, 130, 45, 20],
+  },
+  {
+    id: 'dong-hoi',
+    name: 'Trạm Đồng Hới (Quảng Bình)',
+    regionId: 'bac-trung-bo',
+    regionName: 'Bắc Trung Bộ',
+    domain: 'Bắc',
+    atlatCoords: { top: '39%', left: '52%' },
+    map3DCoords: { x: 215, y: 155 },
+    tempAnnual: '24.8°C',
+    tempMinMax: '19.2°C (tháng 1) — 29.6°C (tháng 7)',
+    tempAmp: '10.4°C',
+    rainfallAnnual: '2.180 mm/năm',
+    rainySeason: 'Tháng 9 — Tháng 12 (đỉnh mưa tháng 10 >600 mm)',
+    specialPhenomena: 'Đầu hè chịu gió phơn Tây Nam cực nóng rát (>40°C), thu đông chịu bão lũ dồn dập.',
+    riskFactor: 'Lũ lụt, cát bay cát chảy lấn chiếm đồng ruộng ven biển.',
+    schoolAction: 'Trồng phi lao chắn cát ven biển và học kỹ năng ứng phó bão lũ an toàn.',
+    monthlyTemp: [19.2, 19.8, 22.4, 25.8, 28.5, 29.6, 29.4, 28.7, 26.8, 24.9, 22.6, 20.1],
+    monthlyRain: [55, 40, 45, 60, 110, 95, 85, 140, 420, 640, 360, 130],
+  },
+  {
+    id: 'da-nang',
+    name: 'Trạm Đà Nẵng (Duyên hải)',
+    regionId: 'nam-trung-bo',
+    regionName: 'Nam Trung Bộ',
+    domain: 'Nam',
+    atlatCoords: { top: '48%', left: '60%' },
+    map3DCoords: { x: 245, y: 195 },
+    tempAnnual: '25.9°C',
+    tempMinMax: '21.5°C (tháng 1) — 29.4°C (tháng 6-7)',
+    tempAmp: '7.9°C',
+    rainfallAnnual: '2.510 mm/năm',
+    rainySeason: 'Tháng 9 — Tháng 12 (tháng 10-11 mưa cực lớn >700 mm/tháng)',
+    specialPhenomena: 'Nằm ngay phía nam dãy Bạch Mã, chịu ảnh hưởng mưa sườn đón gió và bão nhiệt đới.',
+    riskFactor: 'Bão lớn đổ bộ, sạt lở ven bờ và ngập lụt ven sông Vu Gia - Thu Bồn.',
+    schoolAction: 'Diễn tập phòng chống thiên tai bão lụt tại trường học, thu dọn rác bãi biển.',
+    monthlyTemp: [21.5, 22.4, 24.5, 27.0, 28.8, 29.4, 29.2, 28.8, 27.4, 25.8, 24.0, 22.3],
+    monthlyRain: [85, 30, 25, 30, 70, 85, 90, 115, 350, 750, 620, 260],
+  },
+  {
+    id: 'nha-trang',
+    name: 'Trạm Nha Trang (Khánh Hòa)',
+    regionId: 'nam-trung-bo',
+    regionName: 'Nam Trung Bộ',
+    domain: 'Nam',
+    atlatCoords: { top: '74%', left: '71%' },
+    map3DCoords: { x: 280, y: 295 },
+    tempAnnual: '26.8°C',
+    tempMinMax: '23.8°C (tháng 1) — 28.8°C (tháng 6-7)',
+    tempAmp: '5.0°C (Biên độ nhiệt nhỏ)',
+    rainfallAnnual: '1.360 mm/năm (Thuộc vùng khô hạn)',
+    rainySeason: 'Tháng 9 — Tháng 12 (ngắn và tập trung)',
+    specialPhenomena: 'Khí hậu ven biển ôn hòa, nhiều nắng, mùa khô kéo dài tới 8 tháng.',
+    riskFactor: 'Khô hạn kéo dài ảnh hưởng nguồn nước ngọt, xói lở bờ biển.',
+    schoolAction: 'Tiết kiệm nước ngọt, bảo vệ rạn san hô và rừng ngập mặn vịnh Nha Trang.',
+    monthlyTemp: [23.8, 24.5, 26.0, 27.6, 28.5, 28.8, 28.5, 28.4, 27.8, 26.8, 25.5, 24.2],
+    monthlyRain: [40, 15, 18, 25, 60, 45, 40, 55, 175, 330, 370, 185],
+  },
+  {
+    id: 'da-lat',
+    name: 'Trạm Đà Lạt (Lâm Đồng)',
+    regionId: 'tay-nguyen',
+    regionName: 'Tây Nguyên',
+    domain: 'Nam',
+    atlatCoords: { top: '76%', left: '64%' },
+    map3DCoords: { x: 255, y: 305 },
+    tempAnnual: '18.1°C',
+    tempMinMax: '15.8°C (tháng 1) — 19.6°C (tháng 5)',
+    tempAmp: '3.8°C (Rất nhỏ)',
+    rainfallAnnual: '1.760 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 10',
+    specialPhenomena: 'Độ cao ~1500m trên cao nguyên Lang Biang, quanh năm mát mẻ như xứ ôn đới, nhiều sương mù.',
+    riskFactor: 'Xói mòn đất dốc do phá rừng trồng rau hoa trong nhà kính.',
+    schoolAction: 'Hạn chế sử dụng màng phủ nilon trong nông nghiệp, trồng thông phủ xanh đồi dốc.',
+    monthlyTemp: [15.8, 16.5, 18.0, 19.2, 19.6, 19.2, 18.8, 18.7, 18.5, 18.0, 17.2, 16.1],
+    monthlyRain: [10, 15, 40, 100, 210, 230, 250, 260, 280, 230, 95, 40],
+  },
+  {
+    id: 'tp-hcm',
+    name: 'Trạm TP. Hồ Chí Minh',
+    regionId: 'nam-bo',
+    regionName: 'Nam Bộ',
+    domain: 'Nam',
+    atlatCoords: { top: '85%', left: '53%' },
+    map3DCoords: { x: 220, y: 345 },
+    tempAnnual: '27.4°C',
+    tempMinMax: '26.0°C (tháng 12-1) — 29.1°C (tháng 4)',
+    tempAmp: '3.1°C (Biên độ nhiệt năm rất nhỏ)',
+    rainfallAnnual: '1.950 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 11 (chiếm >85% lượng mưa năm)',
+    specialPhenomena: 'Khí hậu cận xích đạo gió mùa điển hình, nắng ấm quanh năm, 2 mùa mưa - khô rõ rệt.',
+    riskFactor: 'Ngập lụt đô thị do triều cường kết hợp mưa lớn, hiệu ứng đảo nhiệt.',
+    schoolAction: 'Phân loại rác tại nguồn, giữ thông thoáng cống rãnh trường học, tiết kiệm điện điều hòa.',
+    monthlyTemp: [26.0, 26.8, 28.2, 29.1, 28.8, 28.1, 27.6, 27.5, 27.2, 27.0, 26.8, 26.1],
+    monthlyRain: [15, 8, 12, 55, 220, 290, 310, 305, 330, 270, 115, 40],
+  },
+  {
+    id: 'can-tho',
+    name: 'Trạm Cần Thơ (ĐBSCL)',
+    regionId: 'nam-bo',
+    regionName: 'Nam Bộ',
+    domain: 'Nam',
+    atlatCoords: { top: '89%', left: '42%' },
+    map3DCoords: { x: 175, y: 365 },
+    tempAnnual: '27.1°C',
+    tempMinMax: '25.6°C (tháng 1) — 28.4°C (tháng 4)',
+    tempAmp: '2.8°C',
+    rainfallAnnual: '1.650 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 11',
+    specialPhenomena: 'Đồng bằng phù sa châu thổ sông Cửu Long, mạng lưới sông ngòi kênh rạch chằng chịt.',
+    riskFactor: 'Hạn hán và xâm nhập mặn mùa khô, ngập lụt mùa nước nổi và triều cường.',
+    schoolAction: 'Tuyên truyền tiết kiệm nước ngọt mùa khô, không xả rác xuống kênh rạch.',
+    monthlyTemp: [25.6, 26.2, 27.4, 28.4, 28.1, 27.6, 27.2, 27.1, 26.9, 26.7, 26.5, 25.8],
+    monthlyRain: [10, 5, 10, 45, 180, 220, 240, 250, 270, 260, 130, 30],
+  },
+  {
+    id: 'ca-mau',
+    name: 'Trạm Cà Mau (Cực Nam)',
+    regionId: 'nam-bo',
+    regionName: 'Nam Bộ',
+    domain: 'Nam',
+    atlatCoords: { top: '95%', left: '38%' },
+    map3DCoords: { x: 155, y: 395 },
+    tempAnnual: '27.2°C',
+    tempMinMax: '25.8°C (tháng 1) — 28.6°C (tháng 4)',
+    tempAmp: '2.8°C',
+    rainfallAnnual: '2.350 mm/năm',
+    rainySeason: 'Tháng 5 — Tháng 11',
+    specialPhenomena: 'Ba mặt giáp biển, hệ sinh thái rừng ngập mặn lớn thứ 2 thế giới sau Amazon.',
+    riskFactor: 'Xói lở bờ biển nghiêm trọng, nước biển dâng, sụt lún đất do khai thác nước ngầm.',
+    schoolAction: 'Bảo vệ và trồng thêm rừng đước ngập mặn chắn sóng bảo vệ bán đảo Cà Mau.',
+    monthlyTemp: [25.8, 26.5, 27.6, 28.6, 28.2, 27.7, 27.4, 27.3, 27.1, 27.0, 26.8, 26.0],
+    monthlyRain: [20, 10, 25, 80, 270, 310, 340, 360, 390, 350, 160, 45],
+  },
+  {
+    id: 'hoang-sa',
+    name: 'Quần đảo Hoàng Sa (TP. Đà Nẵng)',
+    regionId: 'nam-trung-bo',
+    regionName: 'Biển đảo Việt Nam',
+    domain: 'Nam',
+    atlatCoords: { top: '48%', left: '92%' },
+    map3DCoords: { x: 385, y: 195 },
+    tempAnnual: '26.5°C',
+    tempMinMax: '23.0°C (tháng 1) — 29.5°C (tháng 6)',
+    tempAmp: '6.5°C',
+    rainfallAnnual: '1.200 - 1.600 mm/năm',
+    rainySeason: 'Tháng 8 — Tháng 11',
+    specialPhenomena: 'Khí hậu nhiệt đới hải đảo gió mùa, nhiều bão nhiệt đới và áp thấp trên Biển Đông.',
+    riskFactor: 'Siêu bão nhiệt đới đổ bộ trực tiếp từ biển Đông.',
+    schoolAction: 'Nâng cao ý thức chủ quyền biển đảo thiêng liêng và bảo vệ môi trường biển.',
+    monthlyTemp: [23.0, 24.0, 25.5, 27.5, 29.0, 29.5, 29.2, 28.8, 28.0, 27.0, 25.5, 24.0],
+    monthlyRain: [30, 20, 15, 25, 60, 90, 120, 210, 320, 350, 180, 80],
+  },
+  {
+    id: 'truong-sa',
+    name: 'Quần đảo Trường Sa (Khánh Hòa)',
+    regionId: 'nam-trung-bo',
+    regionName: 'Biển đảo Việt Nam',
+    domain: 'Nam',
+    atlatCoords: { top: '89%', left: '88%' },
+    map3DCoords: { x: 375, y: 360 },
+    tempAnnual: '27.8°C',
+    tempMinMax: '26.2°C (tháng 1) — 29.5°C (tháng 5)',
+    tempAmp: '3.3°C',
+    rainfallAnnual: '2.500 mm/năm',
+    rainySeason: 'Tháng 8 — Tháng 12',
+    specialPhenomena: 'Khí hậu cận xích đạo hải đảo, nắng gió quanh năm, thời tiết diễn biến nhanh chóng.',
+    riskFactor: 'Bão biển cuối năm, khan hiếm nước ngọt trong mùa khô, sóng lớn.',
+    schoolAction: 'Học sinh tích cực gửi thông điệp và tiết kiệm nước ngọt như các chiến sĩ Trường Sa.',
+    monthlyTemp: [26.2, 26.8, 27.8, 29.2, 29.5, 28.8, 28.2, 28.0, 28.0, 27.8, 27.2, 26.5],
+    monthlyRain: [70, 25, 20, 40, 130, 160, 220, 270, 340, 380, 460, 380],
   },
 ];
 
 export const VietnamClimateMap3D: React.FC = () => {
-  const [selectedRegion, setSelectedRegion] = useState<RegionalClimateData>(VIETNAM_REGIONS[1]); // Default Central
-  const [viewMode, setViewMode] = useState<'map' | 'hero3d'>('map');
+  const [activeTab, setActiveTab] = useState<'atlat' | 'model3d'>('atlat');
+  const [selectedStation, setSelectedStation] = useState<ClimateStationData>(CLIMATE_STATIONS[3]); // Default Ha Noi
+  const [selectedZone, setSelectedZone] = useState<ClimateZone>(CLIMATE_ZONES[2]); // Default Trung & Nam Bac Bo
+  const [zoomLevel, setZoomLevel] = useState<number>(100);
+  const [showWindLayers, setShowWindLayers] = useState<boolean>(true);
+  const [showStormLayers, setShowStormLayers] = useState<boolean>(true);
 
-  const RegionIcon = selectedRegion.icon;
+  const months = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
+
+  // Calculate scaled bar heights for rainfall graph (max rain ~ 750mm)
+  const maxRain = 750;
+
+  const handleSelectStation = (st: ClimateStationData) => {
+    setSelectedStation(st);
+    const zone = CLIMATE_ZONES.find((z) => z.id === st.regionId);
+    if (zone) setSelectedZone(zone);
+  };
+
+  const handleSelectZone = (zone: ClimateZone) => {
+    setSelectedZone(zone);
+    const station = CLIMATE_STATIONS.find((s) => s.regionId === zone.id);
+    if (station) setSelectedStation(station);
+  };
 
   return (
-    <div className="w-full rounded-3xl bg-gradient-to-br from-white/95 via-emerald-50/60 to-teal-50/70 border border-emerald-300 shadow-2xl p-5 sm:p-8 backdrop-blur-md relative overflow-hidden space-y-6">
-      {/* Decorative ambient lighting aura */}
-      <div className="absolute top-0 right-1/4 w-96 h-96 bg-emerald-400/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-10 w-80 h-80 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Control Header & Mode Switcher */}
-      <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-emerald-200/80">
+    <div className="bg-white/95 backdrop-blur-xl rounded-3xl border border-emerald-300/80 shadow-2xl p-4 sm:p-6 lg:p-8 space-y-6">
+      {/* Header and Mode Selector */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-emerald-100">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Mô Hình Địa Lý Khí Hậu Sinh Thái Tương Tác</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider">
+            <Compass className="w-3.5 h-3.5 text-emerald-700" />
+            <span>Địa Lí Khí Hậu Việt Nam — Chuẩn Atlat Địa Lí</span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-1">
-            {viewMode === 'map'
-              ? 'Bản Đồ Khí Hậu 5 Vùng Sinh Thái Việt Nam'
-              : 'Hiệp Sĩ Xanh THPT & Quả Cầu Sinh Thái Net Zero 2050'}
-          </h3>
-          <p className="text-xs text-slate-600 mt-0.5">
-            Khẳng định toàn vẹn lãnh thổ, đất liền và hai quần đảo Hoàng Sa — Trường Sa thiêng liêng của Tổ quốc
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight mt-1.5 flex items-center gap-2">
+            <span>Bản Đồ Khí Hậu Chung Việt Nam</span>
+            <span className="text-xs sm:text-sm font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800">
+              Tỉ lệ 1:9 000 000
+            </span>
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
+            2 Miền khí hậu (Bắc — Nam ngăn bởi dãy Bạch Mã), 7 Vùng khí hậu, hướng gió mùa & quy luật bão biển
           </p>
         </div>
 
-        {/* Mode Toggle Buttons */}
-        <div className="flex items-center p-1 bg-slate-100/90 rounded-2xl border border-slate-200 self-start sm:self-auto shrink-0 shadow-inner">
+        {/* View Mode Toggle Buttons */}
+        <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-2xl border border-slate-200 shrink-0 self-start lg:self-auto shadow-inner">
           <button
             type="button"
-            onClick={() => setViewMode('map')}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-              viewMode === 'map'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+            onClick={() => setActiveTab('atlat')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
+              activeTab === 'atlat'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                : 'text-slate-700 hover:bg-white'
             }`}
           >
-            <Compass className="w-4 h-4" />
-            <span>Bản Đồ Tương Tác</span>
+            <Layers className="w-3.5 h-3.5" />
+            <span>Bản Đồ Atlat Gốc (HD)</span>
           </button>
-
           <button
             type="button"
-            onClick={() => setViewMode('hero3d')}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-              viewMode === 'hero3d'
-                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/20'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-white/80'
+            onClick={() => setActiveTab('model3d')}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition ${
+              activeTab === 'model3d'
+                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+                : 'text-slate-700 hover:bg-white'
             }`}
           >
-            <Shield className="w-4 h-4" />
-            <span>Hiệp Sĩ Xanh 3D</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Mô Hình 3D Đa Lớp</span>
           </button>
         </div>
       </div>
 
-      {/* Main Content Body */}
-      {viewMode === 'map' ? (
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* LEFT: INTERACTIVE 3D VIETNAM MAP (6 Cols) */}
-          <div className="lg:col-span-6 relative flex flex-col items-center justify-center p-4 bg-white/75 rounded-3xl border border-emerald-200/90 shadow-inner">
-            <div className="w-full max-w-[440px] aspect-[4/5] relative">
-              <svg
-                viewBox="0 0 430 450"
-                className="w-full h-full drop-shadow-xl select-none"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  {/* Topographic Land Gradient */}
-                  <linearGradient id="mapCoastGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="35%" stopColor="#059669" />
-                    <stop offset="70%" stopColor="#0d9488" />
-                    <stop offset="100%" stopColor="#0284c7" />
-                  </linearGradient>
-
-                  <linearGradient id="mapShadowGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#064e3b" />
-                    <stop offset="100%" stopColor="#0f766e" />
-                  </linearGradient>
-
-                  <linearGradient id="flagYellowStar" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fde047" />
-                    <stop offset="100%" stopColor="#eab308" />
-                  </linearGradient>
-                </defs>
-
-                {/* Ocean Ambient Waves */}
-                <path
-                  d="M20 200 C 60 190, 100 210, 140 200 C 180 190, 220 210, 260 200 C 300 190, 340 210, 380 200"
-                  stroke="#38bdf8"
-                  strokeWidth="1.5"
-                  strokeOpacity="0.3"
-                  strokeDasharray="4 6"
-                />
-                <path
-                  d="M10 260 C 50 250, 90 270, 130 260 C 170 250, 210 270, 250 260 C 290 250, 330 270, 370 260"
-                  stroke="#0284c7"
-                  strokeWidth="1.5"
-                  strokeOpacity="0.25"
-                  strokeDasharray="5 7"
-                />
-
-                {/* 3D Depth Layer */}
-                <path
-                  d="M130 50 C 170 20, 220 25, 245 45 C 275 68, 255 95, 230 110 C 210 120, 220 150, 245 170 C 275 195, 280 235, 260 280 C 245 315, 195 365, 150 375 C 130 375, 130 345, 165 320 C 195 295, 215 260, 205 230 C 190 195, 165 165, 155 130 C 140 95, 105 75, 130 50 Z"
-                  fill="url(#mapShadowGradient)"
-                  transform="translate(10, 14)"
-                  opacity="0.6"
-                />
-
-                {/* Main Vietnam Landmass (S-Shape Topography) */}
-                <path
-                  d="M130 50 C 170 20, 220 25, 245 45 C 275 68, 255 95, 230 110 C 210 120, 220 150, 245 170 C 275 195, 280 235, 260 280 C 245 315, 195 365, 150 375 C 130 375, 130 345, 165 320 C 195 295, 215 260, 205 230 C 190 195, 165 165, 155 130 C 140 95, 105 75, 130 50 Z"
-                  fill="url(#mapCoastGradient)"
-                  stroke="#ffffff"
-                  strokeWidth="3.5"
-                />
-
-                {/* Mountain Ridge line (Dãy Trường Sơn Hùng Vĩ) */}
-                <path
-                  d="M195 85 Q 185 130, 220 170 T 240 240 T 195 295"
-                  stroke="#a7f3d0"
-                  strokeWidth="3.5"
-                  strokeDasharray="4 6"
-                  strokeLinecap="round"
-                />
-
-                {/* =======================================================
-                    HẢI ĐẢO & QUẦN ĐẢO THIÊNG LIÊNG CỦA VIỆT NAM
-                    ======================================================= */}
-                {/* 1. Quần đảo Hoàng Sa (TP. Đà Nẵng) */}
-                <g
-                  className="cursor-pointer group"
-                  onClick={() => setSelectedRegion(VIETNAM_REGIONS[4])}
+      {/* Main Interactive Workspace (2 Columns) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT COLUMN: MAP DISPLAY (7 Columns) */}
+        <div className="lg:col-span-7 flex flex-col space-y-4">
+          {activeTab === 'atlat' ? (
+            /* ATLAT HIGH-RESOLUTION INTERACTIVE VIEWER */
+            <div className="relative rounded-2xl border-2 border-emerald-400/80 bg-slate-900 shadow-xl overflow-hidden group">
+              {/* Toolbar */}
+              <div className="absolute top-3 right-3 z-30 flex items-center gap-1.5 p-1 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/20 text-white text-xs">
+                <button
+                  onClick={() => setZoomLevel((prev) => Math.min(prev + 20, 200))}
+                  className="p-1.5 hover:bg-white/20 rounded-lg transition"
+                  title="Phóng to"
                 >
-                  <circle cx="330" cy="155" r="24" fill="#ef4444" fillOpacity="0.18" className="animate-pulse" />
-                  <ellipse cx="330" cy="155" rx="17" ry="11" fill="#059669" stroke="#ffffff" strokeWidth="2" />
-                  <ellipse cx="344" cy="163" rx="10" ry="7" fill="#10b981" stroke="#ffffff" strokeWidth="1.5" />
-                  <ellipse cx="320" cy="165" rx="8" ry="5" fill="#34d399" />
-                  {/* Flag Icon */}
-                  <circle cx="330" cy="138" r="8" fill="#dc2626" />
-                  <path d="M330 133 L332 137 L336 137 L333 139 L334 143 L330 141 L326 143 L327 139 L324 137 L328 137 Z" fill="url(#flagYellowStar)" />
-                  <text x="330" y="125" fill="#dc2626" fontSize="11" fontWeight="900" textAnchor="middle">
-                    QĐ. HOÀNG SA
-                  </text>
-                  <text x="330" y="184" fill="#065f46" fontSize="9" fontWeight="bold" textAnchor="middle">
-                    (TP. Đà Nẵng)
-                  </text>
-                </g>
-
-                {/* 2. Quần đảo Trường Sa (Tỉnh Khánh Hòa) */}
-                <g
-                  className="cursor-pointer group"
-                  onClick={() => setSelectedRegion(VIETNAM_REGIONS[4])}
+                  <ZoomIn className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setZoomLevel((prev) => Math.max(prev - 20, 80))}
+                  className="p-1.5 hover:bg-white/20 rounded-lg transition"
+                  title="Thu nhỏ"
                 >
-                  <circle cx="348" cy="285" r="26" fill="#ef4444" fillOpacity="0.18" className="animate-pulse" />
-                  <ellipse cx="348" cy="285" rx="19" ry="12" fill="#0d9488" stroke="#ffffff" strokeWidth="2" />
-                  <ellipse cx="364" cy="296" rx="11" ry="8" fill="#14b8a6" stroke="#ffffff" strokeWidth="1.5" />
-                  <ellipse cx="333" cy="298" rx="9" ry="6" fill="#2dd4bf" />
-                  <ellipse cx="350" cy="310" rx="8" ry="5" fill="#5eead4" />
-                  {/* Flag Icon */}
-                  <circle cx="348" cy="265" r="8" fill="#dc2626" />
-                  <path d="M348 260 L350 264 L354 264 L351 266 L352 270 L348 268 L344 270 L345 266 L342 264 L346 264 Z" fill="url(#flagYellowStar)" />
-                  <text x="348" y="252" fill="#dc2626" fontSize="11" fontWeight="900" textAnchor="middle">
-                    QĐ. TRƯỜNG SA
-                  </text>
-                  <text x="348" y="328" fill="#115e59" fontSize="9" fontWeight="bold" textAnchor="middle">
-                    (Tỉnh Khánh Hòa)
-                  </text>
-                </g>
+                  <ZoomOut className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setZoomLevel(100)}
+                  className="px-2 py-1 hover:bg-white/20 rounded-lg font-mono text-[11px] transition"
+                  title="Đặt lại kích thước"
+                >
+                  {zoomLevel}%
+                </button>
+              </div>
 
-                {/* 3. Đảo Phú Quốc (Kiên Giang) */}
-                <g transform="translate(120, 360)">
-                  <ellipse cx="0" cy="0" rx="10" ry="15" fill="#059669" stroke="#ffffff" strokeWidth="2" />
-                  <text x="0" y="24" fill="#065f46" fontSize="9" fontWeight="bold" textAnchor="middle">
-                    Phú Quốc
-                  </text>
-                </g>
+              {/* Notice Banner */}
+              <div className="absolute top-3 left-3 z-30 px-3 py-1.5 bg-emerald-950/85 backdrop-blur-md rounded-xl border border-emerald-400/40 text-emerald-200 text-[11px] font-medium flex items-center gap-1.5 shadow-md">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Bấm vào các trạm khí tượng trên bản đồ để xem biểu đồ</span>
+              </div>
 
-                {/* 4. Côn Đảo (Bà Rịa - Vũng Tàu) */}
-                <g transform="translate(195, 385)">
-                  <ellipse cx="0" cy="0" rx="7" ry="6" fill="#0284c7" stroke="#ffffff" strokeWidth="1.5" />
-                  <text x="0" y="16" fill="#075985" fontSize="8" fontWeight="bold" textAnchor="middle">
+              {/* Scrollable / Zoomable Container */}
+              <div className="overflow-auto max-h-[640px] p-2 flex items-center justify-center bg-slate-950/90">
+                <div
+                  className="relative transition-all duration-200 ease-out inline-block select-none"
+                  style={{ width: `${zoomLevel}%`, minWidth: '420px' }}
+                >
+                  <img
+                    src="/assets/atlat-khi-hau-viet-nam.jpg"
+                    alt="Bản đồ khí hậu chung Việt Nam chuẩn Atlat Địa lí"
+                    className="w-full h-auto rounded-xl shadow-2xl block border border-slate-700"
+                    loading="eager"
+                  />
+
+                  {/* Interactive Hotspots Overlaid on the Atlat Map */}
+                  {CLIMATE_STATIONS.map((st) => {
+                    const isSelected = selectedStation.id === st.id;
+                    return (
+                      <button
+                        key={st.id}
+                        type="button"
+                        onClick={() => handleSelectStation(st)}
+                        style={{ top: st.atlatCoords.top, left: st.atlatCoords.left }}
+                        className={`absolute -translate-x-1/2 -translate-y-1/2 group/pin z-20 transition-transform ${
+                          isSelected ? 'scale-125 z-30' : 'hover:scale-115'
+                        }`}
+                        title={`${st.name} — Bấm xem biểu đồ nhiệt độ & lượng mưa`}
+                      >
+                        <div className="relative flex items-center justify-center">
+                          <span
+                            className={`absolute w-6 h-6 rounded-full animate-ping opacity-75 ${
+                              isSelected ? 'bg-red-500' : 'bg-emerald-400'
+                            }`}
+                          />
+                          <div
+                            className={`w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white text-[10px] font-black ${
+                              isSelected
+                                ? 'bg-red-600 text-white ring-2 ring-red-400'
+                                : 'bg-emerald-600 text-white'
+                            }`}
+                          >
+                            ★
+                          </div>
+                        </div>
+
+                        {/* Hover / Selected Label */}
+                        <div
+                          className={`absolute left-1/2 -translate-x-1/2 bottom-full mb-1 px-2 py-0.5 rounded-md text-[10px] font-bold whitespace-nowrap shadow-md pointer-events-none transition ${
+                            isSelected
+                              ? 'bg-red-600 text-white opacity-100'
+                              : 'bg-slate-900/90 text-white opacity-0 group-hover/pin:opacity-100'
+                          }`}
+                        >
+                          {st.name.split(' (')[0]}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* 3D LAYERED ECO MAP */
+            <div className="relative rounded-2xl border-2 border-emerald-400/80 bg-gradient-to-b from-slate-900 via-teal-950 to-slate-950 p-6 shadow-2xl overflow-hidden min-h-[580px] flex flex-col justify-between">
+              {/* Layer Controls */}
+              <div className="flex flex-wrap items-center justify-between gap-2 z-20 pb-2 border-b border-white/10">
+                <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                  <Layers className="w-3.5 h-3.5" /> Các lớp chuyên đề:
+                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowWindLayers(!showWindLayers)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
+                      showWindLayers
+                        ? 'bg-blue-600 border-blue-400 text-white'
+                        : 'bg-slate-800 border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    Gió Mùa (Đông & Hạ)
+                  </button>
+                  <button
+                    onClick={() => setShowStormLayers(!showStormLayers)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-bold border transition ${
+                      showStormLayers
+                        ? 'bg-amber-600 border-amber-400 text-white'
+                        : 'bg-slate-800 border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    Bão Biển (Tháng 6-12)
+                  </button>
+                </div>
+              </div>
+
+              {/* 3D SVG Canvas */}
+              <div className="relative w-full max-w-[420px] aspect-[4/5] mx-auto my-2">
+                <svg viewBox="0 0 450 480" className="w-full h-full drop-shadow-2xl select-none">
+                  <defs>
+                    <linearGradient id="domainNorthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#10b981" />
+                      <stop offset="100%" stopColor="#047857" />
+                    </linearGradient>
+                    <linearGradient id="domainSouthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#f59e0b" />
+                      <stop offset="100%" stopColor="#ea580c" />
+                    </linearGradient>
+                    <linearGradient id="ocean3DGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#0369a1" stopOpacity="0.4" />
+                      <stop offset="100%" stopColor="#0c4a6e" stopOpacity="0.8" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Ocean Base */}
+                  <rect width="450" height="480" fill="url(#ocean3DGrad)" rx="16" />
+
+                  {/* Grid Lines */}
+                  <line x1="40" y1="120" x2="410" y2="120" stroke="#38bdf8" strokeOpacity="0.15" strokeDasharray="3 3" />
+                  <line x1="40" y1="240" x2="410" y2="240" stroke="#38bdf8" strokeOpacity="0.15" strokeDasharray="3 3" />
+                  <line x1="40" y1="360" x2="410" y2="360" stroke="#38bdf8" strokeOpacity="0.15" strokeDasharray="3 3" />
+                  <line x1="150" y1="20" x2="150" y2="460" stroke="#38bdf8" strokeOpacity="0.15" strokeDasharray="3 3" />
+                  <line x1="300" y1="20" x2="300" y2="460" stroke="#38bdf8" strokeOpacity="0.15" strokeDasharray="3 3" />
+
+                  {/* 3D Depth Shadow of S-Curve Land */}
+                  <path
+                    d="M110 50 C 160 20, 220 25, 235 50 C 260 75, 240 100, 215 115 C 190 130, 205 160, 230 180 C 265 210, 275 255, 250 300 C 235 330, 180 375, 140 385 C 120 385, 120 355, 155 330 C 185 305, 200 270, 190 240 C 175 205, 150 175, 140 140 C 125 105, 95 80, 110 50 Z"
+                    fill="#022c22"
+                    transform="translate(10, 14)"
+                    opacity="0.8"
+                  />
+
+                  {/* Mainland S-Shape (Domain North & South) */}
+                  <path
+                    d="M110 50 C 160 20, 220 25, 235 50 C 260 75, 240 100, 215 115 C 190 130, 205 160, 230 180 C 265 210, 275 255, 250 300 C 235 330, 180 375, 140 385 C 120 385, 120 355, 155 330 C 185 305, 200 270, 190 240 C 175 205, 150 175, 140 140 C 125 105, 95 80, 110 50 Z"
+                    fill="url(#domainNorthGrad)"
+                    stroke="#a7f3d0"
+                    strokeWidth="2.5"
+                  />
+
+                  {/* Boundary Line: Dãy Bạch Mã (16°B) */}
+                  <line
+                    x1="220"
+                    y1="190"
+                    x2="260"
+                    y2="190"
+                    stroke="#ef4444"
+                    strokeWidth="3.5"
+                    strokeDasharray="4 2"
+                  />
+                  <text x="268" y="193" fill="#f87171" fontSize="10" fontWeight="bold">
+                    Dãy Bạch Mã (16°B)
+                  </text>
+
+                  {/* Domain Badges */}
+                  <rect x="135" y="85" width="28" height="22" rx="6" fill="#047857" stroke="#34d399" strokeWidth="1.5" />
+                  <text x="149" y="101" fill="#ffffff" fontSize="13" fontWeight="900" textAnchor="middle">
+                    B
+                  </text>
+
+                  <rect x="205" y="270" width="28" height="22" rx="6" fill="#ea580c" stroke="#fcd34d" strokeWidth="1.5" />
+                  <text x="219" y="286" fill="#ffffff" fontSize="13" fontWeight="900" textAnchor="middle">
+                    N
+                  </text>
+
+                  {/* SOVEREIGN ARCHIPELAGOES: HOÀNG SA & TRƯỜNG SA */}
+                  {/* Quần đảo Hoàng Sa (TP. Đà Nẵng) */}
+                  <g className="cursor-pointer" onClick={() => handleSelectStation(CLIMATE_STATIONS[11])}>
+                    <rect x="345" y="175" width="85" height="34" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="1.5" />
+                    <circle cx="355" cy="192" r="5" fill="#ef4444" />
+                    <text x="366" y="188" fill="#fde047" fontSize="10" fontWeight="bold">
+                      QĐ. HOÀNG SA
+                    </text>
+                    <text x="366" y="200" fill="#cbd5e1" fontSize="8">
+                      (TP. Đà Nẵng)
+                    </text>
+                  </g>
+
+                  {/* Quần đảo Trường Sa (Khánh Hòa) */}
+                  <g className="cursor-pointer" onClick={() => handleSelectStation(CLIMATE_STATIONS[12])}>
+                    <rect x="330" y="340" width="95" height="34" rx="8" fill="#1e293b" stroke="#f59e0b" strokeWidth="1.5" />
+                    <circle cx="340" cy="357" r="5" fill="#ef4444" />
+                    <text x="351" y="353" fill="#fde047" fontSize="10" fontWeight="bold">
+                      QĐ. TRƯỜNG SA
+                    </text>
+                    <text x="351" y="365" fill="#cbd5e1" fontSize="8">
+                      (Tỉnh Khánh Hòa)
+                    </text>
+                  </g>
+
+                  {/* Đảo Phú Quốc */}
+                  <ellipse cx="115" cy="365" rx="8" ry="12" fill="#10b981" stroke="#34d399" strokeWidth="1.5" />
+                  <text x="75" y="368" fill="#e2e8f0" fontSize="8" fontWeight="bold">
+                    Đ. Phú Quốc
+                  </text>
+
+                  {/* Côn Đảo */}
+                  <circle cx="210" cy="425" r="5" fill="#10b981" stroke="#34d399" strokeWidth="1" />
+                  <text x="220" y="428" fill="#cbd5e1" fontSize="8">
                     Côn Đảo
                   </text>
-                </g>
 
-                {/* 5. Đảo Bạch Long Vĩ & Cát Bà (Bắc Bộ) */}
-                <g transform="translate(230, 80)">
-                  <circle cx="0" cy="0" r="5" fill="#059669" stroke="#ffffff" strokeWidth="1.5" />
-                  <circle cx="16" cy="14" r="3.5" fill="#10b981" />
-                  <text x="12" y="-6" fill="#065f46" fontSize="8" fontWeight="bold" textAnchor="middle">
-                    Bạch Long Vĩ
-                  </text>
-                </g>
+                  {/* Wind Layers (Animated Arrows) */}
+                  {showWindLayers && (
+                    <g>
+                      {/* Gió mùa mùa đông (Xanh Đông Bắc) */}
+                      <path
+                        d="M320 60 L240 100"
+                        stroke="#38bdf8"
+                        strokeWidth="3"
+                        markerEnd="url(#arrowBlue)"
+                        strokeDasharray="6 3"
+                      />
+                      <text x="310" y="52" fill="#7dd3fc" fontSize="9" fontWeight="bold">
+                        Gió mùa Đông Bắc
+                      </text>
 
-                {/* =======================================================
-                    CÁC GHIM TƯƠNG TÁC ĐỊA LÝ (INTERACTIVE PINS DIRECTLY ON MAP)
-                    ======================================================= */}
-                {VIETNAM_REGIONS.map((region) => {
-                  const isSelected = selectedRegion.id === region.id;
-                  return (
-                    <g
-                      key={region.id}
-                      transform={`translate(${region.coords.x}, ${region.coords.y})`}
-                      onClick={() => setSelectedRegion(region)}
-                      className="cursor-pointer transition-all duration-300"
-                    >
-                      {/* Radar Ping Ripple when selected */}
-                      {isSelected && (
-                        <>
-                          <circle cx="0" cy="0" r="22" fill={region.color} fillOpacity="0.25" className="animate-ping" />
-                          <circle cx="0" cy="0" r="16" fill={region.color} fillOpacity="0.3" />
-                        </>
-                      )}
+                      {/* Gió mùa mùa hạ (Đỏ Tây Nam) */}
+                      <path
+                        d="M120 440 L190 380"
+                        stroke="#f87171"
+                        strokeWidth="3"
+                        markerEnd="url(#arrowRed)"
+                        strokeDasharray="6 3"
+                      />
+                      <text x="90" y="455" fill="#fca5a5" fontSize="9" fontWeight="bold">
+                        Gió mùa Tây Nam
+                      </text>
 
-                      {/* Pin Center Glow */}
-                      <circle
-                        cx="0"
-                        cy="0"
-                        r={isSelected ? "14" : "10"}
-                        fill={region.color}
-                        stroke="#ffffff"
+                      {/* Gió phơn Tây Nam (Gió Lào khô nóng) */}
+                      <path
+                        d="M140 180 C180 170, 200 180, 220 170"
+                        stroke="#fbbf24"
                         strokeWidth="2.5"
-                        className="drop-shadow-lg transition-transform hover:scale-125"
+                        strokeDasharray="4 2"
+                      />
+                      <text x="130" y="165" fill="#fde68a" fontSize="8" fontWeight="bold">
+                        Gió Phơn khô nóng
+                      </text>
+                    </g>
+                  )}
+
+                  {/* Storm Tracks (Bão theo tháng) */}
+                  {showStormLayers && (
+                    <g>
+                      <path d="M370 110 C 310 100, 260 110, 210 90" stroke="#f59e0b" strokeWidth="2" strokeDasharray="5 3" />
+                      <text x="375" y="112" fill="#fcd34d" fontSize="9" fontWeight="bold">Tháng 6, 7, 8</text>
+
+                      <path d="M390 230 C 330 220, 280 230, 235 220" stroke="#ef4444" strokeWidth="2.5" strokeDasharray="5 3" />
+                      <text x="395" y="234" fill="#fca5a5" fontSize="9" fontWeight="bold">Tháng 9, 10, 11</text>
+
+                      <path d="M360 320 C 300 330, 250 340, 215 345" stroke="#f97316" strokeWidth="2" strokeDasharray="5 3" />
+                      <text x="365" y="324" fill="#fdba74" fontSize="9" fontWeight="bold">Tháng 12</text>
+                    </g>
+                  )}
+
+                  {/* Weather Station Pins */}
+                  {CLIMATE_STATIONS.map((st) => {
+                    const isSelected = selectedStation.id === st.id;
+                    return (
+                      <g
+                        key={st.id}
+                        className="cursor-pointer"
+                        onClick={() => handleSelectStation(st)}
+                        transform={`translate(${st.map3DCoords.x}, ${st.map3DCoords.y})`}
+                      >
+                        <circle
+                          r={isSelected ? '8' : '5'}
+                          fill={isSelected ? '#ef4444' : '#ffffff'}
+                          stroke={isSelected ? '#fde047' : '#059669'}
+                          strokeWidth="2"
+                        />
+                        {isSelected && (
+                          <circle r="14" fill="none" stroke="#ef4444" strokeWidth="1.5" className="animate-ping" opacity="0.6" />
+                        )}
+                        <text
+                          y="-8"
+                          fill={isSelected ? '#fde047' : '#f8fafc'}
+                          fontSize="9"
+                          fontWeight="bold"
+                          textAnchor="middle"
+                        >
+                          {st.name.split(' (')[0]}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              {/* Bottom Quick Legend */}
+              <div className="flex items-center justify-between text-[11px] text-slate-300 pt-2 border-t border-white/10">
+                <div className="flex items-center gap-3">
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full bg-emerald-500 inline-block" /> Miền Bắc (B)
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" /> Miền Nam (N)
+                  </span>
+                </div>
+                <span className="font-bold text-amber-300">Hoàng Sa & Trường Sa là của Việt Nam</span>
+              </div>
+            </div>
+          )}
+
+          {/* 7 Climate Zones Bar */}
+          <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider block">
+              7 Vùng khí hậu theo Atlat Địa lí Việt Nam (Bấm để xem đặc điểm):
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              {CLIMATE_ZONES.map((zone) => {
+                const isSelected = selectedZone.id === zone.id;
+                return (
+                  <button
+                    key={zone.id}
+                    onClick={() => handleSelectZone(zone)}
+                    className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border ${
+                      isSelected
+                        ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                        : 'bg-white hover:bg-slate-100 text-slate-700 border-slate-200'
+                    }`}
+                  >
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: zone.color }} />
+                    <span>{zone.name.replace('Vùng khí hậu ', '')}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: DETAILED STATION CLIMATE DIAGRAM & DATA (5 Columns) */}
+        <div className="lg:col-span-5 space-y-4">
+          {/* Station Profile Card */}
+          <div className="bg-slate-900 text-white rounded-3xl p-5 sm:p-6 shadow-xl border border-slate-800 space-y-4">
+            <div className="flex items-start justify-between gap-3 pb-3 border-b border-slate-800">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  {selectedStation.regionName} — Miền {selectedStation.domain}
+                </span>
+                <h3 className="text-xl font-black text-white mt-1">{selectedStation.name}</h3>
+              </div>
+              <div className="p-2 rounded-2xl bg-white/10 text-amber-400">
+                <Thermometer className="w-6 h-6" />
+              </div>
+            </div>
+
+            {/* Quick Metrics */}
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60">
+                <p className="text-slate-400 text-[11px]">Nhiệt độ TB năm:</p>
+                <p className="text-base font-black text-emerald-400 mt-0.5">{selectedStation.tempAnnual}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Biên độ: {selectedStation.tempAmp}</p>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/60">
+                <p className="text-slate-400 text-[11px]">Tổng lượng mưa năm:</p>
+                <p className="text-base font-black text-cyan-400 mt-0.5">{selectedStation.rainfallAnnual}</p>
+                <p className="text-[10px] text-slate-400 mt-0.5">Mùa mưa: {selectedStation.rainySeason.split(' (')[0]}</p>
+              </div>
+            </div>
+
+            {/* CLIMATE DIAGRAM (BIỂU ĐỒ NHIỆT ĐỘ & LƯỢNG MƯA ATLAT) */}
+            <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
+              <div className="flex items-center justify-between text-[11px] pb-1 border-b border-slate-800">
+                <span className="font-bold text-slate-300">Biểu đồ Nhiệt — Ẩm 12 Tháng:</span>
+                <div className="flex items-center gap-3 text-[10px]">
+                  <span className="flex items-center gap-1 text-cyan-400 font-semibold">
+                    <span className="w-2.5 h-2.5 bg-cyan-500 rounded-xs inline-block" /> Lượng mưa (mm)
+                  </span>
+                  <span className="flex items-center gap-1 text-red-400 font-semibold">
+                    <span className="w-2.5 h-1 bg-red-500 inline-block" /> Nhiệt độ (°C)
+                  </span>
+                </div>
+              </div>
+
+              {/* 12-Month Bar Chart */}
+              <div className="relative h-32 pt-4 flex items-end justify-between gap-1 border-b border-slate-700">
+                {selectedStation.monthlyRain.map((rain, idx) => {
+                  const barHeight = Math.min(Math.round((rain / maxRain) * 100), 100);
+                  const temp = selectedStation.monthlyTemp[idx];
+                  return (
+                    <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group/bar relative">
+                      {/* Temp Dot */}
+                      <div
+                        className="absolute w-2 h-2 rounded-full bg-red-500 border border-white z-10 transition group-hover/bar:scale-125"
+                        style={{ bottom: `${Math.round((temp / 35) * 100)}%` }}
+                        title={`Tháng ${idx + 1}: ${temp}°C`}
                       />
 
-                      {/* Small center dot */}
-                      <circle cx="0" cy="0" r="4" fill="#ffffff" />
-                    </g>
+                      {/* Rain Bar */}
+                      <div
+                        className="w-full bg-gradient-to-t from-cyan-600 to-sky-400 rounded-t-xs transition-all duration-300 group-hover/bar:from-cyan-400 group-hover/bar:to-sky-300"
+                        style={{ height: `${Math.max(barHeight, 4)}%` }}
+                        title={`Tháng ${idx + 1}: ${rain} mm, ${temp}°C`}
+                      />
+
+                      {/* Month Label */}
+                      <span className="text-[9px] font-bold text-slate-400 mt-1 select-none">
+                        {months[idx]}
+                      </span>
+                    </div>
                   );
                 })}
-              </svg>
-
-              {/* Map Legend Floating Tag */}
-              <div className="absolute bottom-2 left-2 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-emerald-300 shadow-sm text-[10px] text-slate-700 font-bold flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse" />
-                <span>Nhấp trực tiếp vào các điểm ghim trên bản đồ</span>
               </div>
             </div>
 
-            {/* Quick Pill Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-1.5 mt-3 pt-2 border-t border-slate-100 w-full">
-              {VIETNAM_REGIONS.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  onClick={() => setSelectedRegion(r)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                    selectedRegion.id === r.id
-                      ? 'bg-slate-900 text-white shadow-md scale-105'
-                      : 'bg-white text-slate-700 border border-slate-200 hover:bg-emerald-50'
-                  }`}
-                >
-                  {r.shortName}
-                </button>
-              ))}
+            {/* Special Climate Features */}
+            <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/60 space-y-1.5 text-xs">
+              <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+                <AlertTriangle className="w-4 h-4" />
+                <span>Hiện tượng thời tiết & Rủi ro:</span>
+              </div>
+              <p className="text-slate-300 leading-relaxed text-[11px]">{selectedStation.specialPhenomena}</p>
+              <p className="text-amber-200/90 text-[11px]">
+                <strong>Thiên tai chính:</strong> {selectedStation.riskFactor}
+              </p>
             </div>
-          </div>
 
-          {/* RIGHT: REGIONAL CLIMATE SPOTLIGHT DETAIL CARD (6 Cols) */}
-          <div className="lg:col-span-6 space-y-4">
-            <div className="bg-white/95 border border-emerald-300 rounded-3xl p-6 shadow-xl space-y-4">
-              {/* Header Badge */}
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${selectedRegion.gradient} text-white flex items-center justify-center shadow-lg`}>
-                    <RegionIcon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-black tracking-wider text-slate-400">
-                      Hồ Sơ Khí Hậu Sinh Thái Vùng
-                    </span>
-                    <h4 className="text-lg font-black text-slate-900">{selectedRegion.name}</h4>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <span className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    Rủi ro: {selectedRegion.climateRiskLevel}
-                  </span>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{selectedRegion.subRegion}</p>
-                </div>
+            {/* Action for High School Students */}
+            <div className="p-3.5 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 space-y-1 text-xs">
+              <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Hành động thích ứng của học sinh:</span>
               </div>
-
-              {/* Climate Stats Strip */}
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-                  <Thermometer className="w-4 h-4 text-rose-600 shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">Biên độ nhiệt</p>
-                    <p className="font-semibold text-slate-800 text-[11px]">{selectedRegion.temperatureRange}</p>
-                  </div>
-                </div>
-
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-cyan-600 shrink-0" />
-                  <div>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase">Lượng mưa năm</p>
-                    <p className="font-semibold text-slate-800 text-[11px]">{selectedRegion.rainfallAnnual}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Slogan Banner */}
-              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-950 via-teal-950 to-slate-900 text-white shadow-md border border-emerald-500/30">
-                <p className="text-xs font-black text-emerald-300 flex items-center gap-2">
-                  <span>🚩 Khẩu hiệu hành động khí hậu:</span>
-                </p>
-                <p className="text-sm font-black text-white mt-0.5 tracking-wide">
-                  "{selectedRegion.slogan}"
-                </p>
-              </div>
-
-              {/* 4 Structured Insights */}
-              <div className="space-y-2.5 pt-1">
-                {/* 1. Climate Challenges */}
-                <div className="p-3 rounded-2xl bg-amber-50/80 border border-amber-200 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>Thách thức thiên tai & biến đổi khí hậu:</span>
-                  </div>
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium pl-5">
-                    {selectedRegion.challenges}
-                  </p>
-                </div>
-
-                {/* 2. Solutions */}
-                <div className="p-3 rounded-2xl bg-teal-50/80 border border-teal-200 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-teal-900">
-                    <Lightbulb className="w-4 h-4 text-teal-600 shrink-0" />
-                    <span>Chiến lược thích ứng & Giảm nhẹ quốc gia:</span>
-                  </div>
-                  <p className="text-xs text-slate-700 leading-relaxed font-medium pl-5">
-                    {selectedRegion.solutions}
-                  </p>
-                </div>
-
-                {/* 3. High School Action */}
-                <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-300 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-900">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                    <span>Hành động học sinh THPT:</span>
-                  </div>
-                  <p className="text-xs text-slate-800 leading-relaxed font-bold pl-5">
-                    {selectedRegion.schoolAction}
-                  </p>
-                </div>
-
-                {/* 4. Suggested Project for SKKN */}
-                <div className="p-2.5 rounded-xl bg-purple-50/70 border border-purple-200 text-[11px] text-purple-950 flex items-center gap-2">
-                  <Award className="w-4 h-4 text-purple-700 shrink-0" />
-                  <span><strong>Ý tưởng dự án SKKN gợi ý:</strong> {selectedRegion.suggestedProject}</span>
-                </div>
-              </div>
+              <p className="text-emerald-100 text-[11px] leading-relaxed font-medium">
+                {selectedStation.schoolAction}
+              </p>
             </div>
           </div>
         </div>
-      ) : (
-        /* HERO 3D GUARDIAN & GLOSSY TRANSLUCENT EARTH VIEW */
-        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center py-4">
-          <div className="lg:col-span-6 space-y-4 text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold">
-              <Shield className="w-4 h-4 text-emerald-600" />
-              <span>Biểu Tượng Thế Hệ Trẻ Tiên Phong Vì Môi Trường</span>
-            </div>
-            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-              Hiệp Sĩ Xanh THPT — Lá Chắn Bảo Vệ Hành Tinh Xanh
-            </h3>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-              Mỗi học sinh THPT không chỉ là người tiếp nhận kiến thức mà chính là một "Đại sứ Xanh" tích cực. Với sự đồng hành của công nghệ AI hiện đại, các em hoàn toàn có thể định lượng được tác động cá nhân, thay đổi thói quen và lan tỏa lối sống bền vững trong nhà trường và cộng đồng.
-            </p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="p-3.5 rounded-2xl bg-white border border-emerald-200 shadow-sm space-y-1">
-                <span className="text-xs font-black text-emerald-800">🎯 Mục Tiêu Net Zero 2050</span>
-                <p className="text-[11px] text-slate-600">
-                  Cam kết của Thủ tướng Chính phủ tại COP26, đưa Việt Nam trở thành quốc gia phát thải ròng bằng 0 vào năm 2050.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded-2xl bg-white border border-teal-200 shadow-sm space-y-1">
-                <span className="text-xs font-black text-teal-800">🌱 Giáo Dục GDPT 2018</span>
-                <p className="text-[11px] text-slate-600">
-                  Tích hợp liên môn Địa lý, Sinh học và Hoạt động trải nghiệm, hình thành phẩm chất yêu nước và trách nhiệm công dân.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-6 flex items-center justify-center">
-            {/* Glossy 3D Earth & Guardian Artwork */}
-            <div className="relative w-full max-w-[360px] aspect-square flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-emerald-400/25 via-teal-300/30 to-cyan-400/25 blur-3xl animate-pulse" />
-
-              <svg
-                viewBox="0 0 400 400"
-                className="w-full h-full drop-shadow-2xl select-none relative z-10"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <radialGradient id="guardianGlobeGrad" cx="30%" cy="25%" r="70%">
-                    <stop offset="0%" stopColor="#ecfdf5" stopOpacity="0.95" />
-                    <stop offset="40%" stopColor="#6ee7b7" stopOpacity="0.75" />
-                    <stop offset="70%" stopColor="#10b981" stopOpacity="0.85" />
-                    <stop offset="95%" stopColor="#047857" stopOpacity="0.95" />
-                    <stop offset="100%" stopColor="#064e3b" stopOpacity="1" />
-                  </radialGradient>
-
-                  <radialGradient id="guardianSheen" cx="35%" cy="25%" r="65%">
-                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.85" />
-                    <stop offset="35%" stopColor="#ffffff" stopOpacity="0.3" />
-                    <stop offset="75%" stopColor="#a7f3d0" stopOpacity="0.1" />
-                    <stop offset="100%" stopColor="#059669" stopOpacity="0.4" />
-                  </radialGradient>
-
-                  <linearGradient id="guardianCape" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#047857" />
-                  </linearGradient>
-
-                  <linearGradient id="skinTone" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#fed7aa" />
-                    <stop offset="100%" stopColor="#fba866" />
-                  </linearGradient>
-                </defs>
-
-                {/* 3D Glossy Sphere */}
-                <circle cx="200" cy="200" r="140" fill="url(#guardianGlobeGrad)" />
-                <path
-                  d="M160 120 C 190 110, 230 125, 250 145 C 265 165, 260 195, 235 210 C 215 220, 205 245, 195 265 C 185 275, 175 265, 165 245 C 150 220, 140 185, 145 155 Z"
-                  fill="#34d399"
-                  fillOpacity="0.75"
-                />
-                <circle cx="260" cy="220" r="14" fill="#059669" fillOpacity="0.7" />
-
-                {/* Vietnam S-Curve Highlight */}
-                <path
-                  d="M205 150 Q 220 180, 205 210 T 215 245"
-                  stroke="#ffffff"
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  strokeDasharray="3 4"
-                />
-
-                {/* Glass Sheen */}
-                <circle cx="200" cy="200" r="140" fill="url(#guardianSheen)" />
-
-                {/* Guardian Student Silhouette with Eco Shield */}
-                <g transform="translate(100, 110)">
-                  {/* Shield */}
-                  <path
-                    d="M30 15 L 60 28 C 60 70, 36 100, 30 110 C 24 100, 0 70, 0 28 Z"
-                    fill="#38bdf8"
-                    fillOpacity="0.7"
-                    stroke="#ffffff"
-                    strokeWidth="3"
-                  />
-                  <circle cx="30" cy="55" r="14" fill="#ffffff" fillOpacity="0.8" />
-                  <path d="M30 45 C 34 45, 38 52, 30 60 C 22 52, 26 45, 30 45 Z" fill="#059669" />
-
-                  {/* Character Head */}
-                  <circle cx="95" cy="40" r="24" fill="url(#skinTone)" />
-                  <ellipse cx="95" cy="30" rx="26" ry="18" fill="#0f172a" />
-                  <circle cx="88" cy="40" r="3" fill="#0f172a" />
-                  <circle cx="102" cy="40" r="3" fill="#0f172a" />
-                  <path d="M91 52 Q 95 56, 99 52" stroke="#e11d48" strokeWidth="2" strokeLinecap="round" fill="none" />
-
-                  {/* Uniform Jacket */}
-                  <path
-                    d="M68 64 C 80 58, 110 58, 122 64 L 130 140 C 105 148, 85 148, 60 140 Z"
-                    fill="url(#guardianCape)"
-                    stroke="#ffffff"
-                    strokeWidth="2"
-                  />
-                  <circle cx="82" cy="80" r="6" fill="#f59e0b" stroke="#ffffff" strokeWidth="1" />
-                </g>
-              </svg>
-
-              {/* Badges */}
-              <div className="absolute -top-3 -right-2 bg-white/95 backdrop-blur-md border border-emerald-400 shadow-xl rounded-2xl p-2.5 flex items-center gap-2 z-20">
-                <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-black">
-                  <TreePine className="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <p className="text-[9px] uppercase font-bold text-slate-400">Cam Kết</p>
-                  <p className="text-xs font-black text-slate-900">Net Zero 2050</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

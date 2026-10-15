@@ -1,0 +1,21 @@
+{
+  "name": "EcoAI - Cố vấn Xanh THPT",
+  "short_name": "EcoAI",
+  "description": "Nền tảng giáo dục biến đổi khí hậu & phát triển bền vững cho học sinh THPT với Bản đồ khí hậu Atlat 3D, Máy tính carbon và Nhận diện rác thông minh.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#059669",
+  "orientation": "portrait",
+  "categories": ["education", "environment"],
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192 512x512 any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

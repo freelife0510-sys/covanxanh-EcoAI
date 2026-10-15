@@ -30,10 +30,9 @@ import { VietnamClimateMap3D } from './VietnamClimateMap3D';
 interface HomeHeroProps {
   onNavigate: (tab: ActiveTab) => void;
   onOpenApiKeyModal: () => void;
-  onOpenDownloadModal?: () => void;
 }
 
-export const HomeHero: React.FC<HomeHeroProps> = ({ onNavigate, onOpenDownloadModal }) => {
+export const HomeHero: React.FC<HomeHeroProps> = ({ onNavigate }) => {
   return (
     <div className="space-y-12 py-2 animate-in fade-in duration-500">
       {/* =========================================================================
@@ -132,20 +131,8 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ onNavigate, onOpenDownloadMo
               className="px-5 py-3.5 rounded-2xl bg-amber-50 hover:bg-amber-100 text-amber-900 font-bold text-xs sm:text-sm border border-amber-300 shadow-md transition-all flex items-center gap-2"
             >
               <GraduationCap className="w-4 h-4 text-amber-700" />
-              <span>Phiếu Học Tập & Đo Nhận Thức (SKKN)</span>
+              <span>Phiếu Học Tập & Đánh Giá</span>
             </button>
-
-            {onOpenDownloadModal && (
-              <button
-                type="button"
-                onClick={onOpenDownloadModal}
-                className="px-5 py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm border border-slate-300 transition-all flex items-center gap-2"
-                title="Tải toàn bộ code và file chạy .bat về máy"
-              >
-                <Download className="w-4 h-4 text-slate-600" />
-                <span>Tải Code Chạy Local (ZIP)</span>
-              </button>
-            )}
           </div>
         </div>
       </section>
@@ -267,13 +254,13 @@ export const HomeHero: React.FC<HomeHeroProps> = ({ onNavigate, onOpenDownloadMo
               </div>
               <div>
                 <span className="text-[10px] font-extrabold uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full border border-amber-300">
-                  Bước 4: Phản tư & SKKN
+                  Bước 4: Hiểu biết của bạn
                 </span>
                 <h3 className="text-base font-black text-slate-900 group-hover:text-amber-700 transition mt-2">
                   Phiếu Học Tập & Đánh Giá
                 </h3>
                 <p className="text-xs text-slate-600 leading-relaxed mt-1.5">
-                  Đối chiếu khung GDPT 2018, làm bài trắc nghiệm đo nhận thức Trước - Sau và xuất phiếu kết quả học tập phục vụ báo cáo.
+                  Đối chiếu khung GDPT 2018, làm bài trắc nghiệm kiến thức được AI tạo mới ngẫu nhiên mỗi lần và xuất phiếu kết quả học tập.
                 </p>
               </div>
             </div>
